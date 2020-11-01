@@ -5,12 +5,13 @@ from dotenv import load_dotenv
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+import inspect
 
 debug_bool = True
 
 class DangError(Exception):
-	def __init__(self, message):
-		super().__init__(message)
+	def __init__(self, *args):
+		self.args = [a for a in args]
 
 load_dotenv()
 
@@ -43,7 +44,6 @@ youtube_api = youtube_auth()
 discord_client = discord_api.Client()
 
 def debug_print(input):
-	global debug_bool
 	if (debug_bool):
 		if (isinstance(input, str)):
 			print("<DEBUG> " + input)
@@ -136,7 +136,7 @@ async def on_ready():
 	try:
 		get_true_random_upload_url()
 	except DangError as e:
-		debug_print(getattr(e, 'message', repr(e)))
+		debug_print(e.args[0])
 
 	for guild in discord_client.guilds:
 		if guild.name == DISCORD_GUILD:
@@ -166,7 +166,7 @@ async def on_message(message):
 					break
 		
 		except DangError as e:
-			await message.channel.send(e.message)
+			await message.channel.send(e.args[0])
 
 	elif randrange(0, 40) == 5:
 		await message.channel.send(get_random_quote())
