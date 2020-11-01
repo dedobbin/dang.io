@@ -51,7 +51,7 @@ def debug_print(input):
 			print("<DEBUG> ")
 			print(input)
 
-def search(dynamic_params, all_pages = True):
+def search(dynamic_params, all_pages = False):
 	static_params = {"part":"snippet"}
 
 	params = {**static_params, **dynamic_params}
@@ -78,12 +78,12 @@ def search(dynamic_params, all_pages = True):
 					items += response['items']
 					next_page = response['nextPageToken']
 			except KeyError as e:
-				debug_print("no next page")
+				pass
 	except googleapiclient.errors.HttpError as e:
 		debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
 		raise DangError("ik heb geen verbinding met youtube :cry~1:")
 	
-	if num_expected != len(items):
+	if all_pages and num_expected != len(items):
 		debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
 
 	if len(items) == 0:
@@ -92,11 +92,11 @@ def search(dynamic_params, all_pages = True):
 	return items
 
 def get_uploads(params, all_pages = False):
-	params = {"channelId": dang_channel_id}
-	search(params, all_pages = all_pages)
+	params ["channelId"] = dang_channel_id
+	return search(params, all_pages = all_pages)
 
 def get_all_uploads():
-	return get_uploads({"maxResults":"50"}, all_pages = True)
+	return get_uploads({"maxResults":"50", "channelId" : dang_channel_id}, all_pages = True)
 
 def get_latest_upload_url():
 	items = get_uploads({"maxResults": "1", "order": "date"})
@@ -105,11 +105,13 @@ def get_latest_upload_url():
 
 def get_random_upload_url():
 	items = get_all_uploads()
+	item = choice(items)
 	video_id = item['id']['videoId']
 	return "https://www.youtube.com/watch?v=" + video_id
 
 def get_true_random_upload_url():
 	s = ''.join(choice(string.ascii_lowercase) for i in range(10))
+	#items = search({'q':s}, all_pages = True)
 	items = search({'q':s}, all_pages = True)
 	video_id = item['id']['videoId']
 	return "https://www.youtube.com/watch?v=" + video_id
@@ -134,7 +136,7 @@ async def on_ready():
 	print(get_random_quote())
 	
 	try:
-		get_true_random_upload_url()
+		debug_print(get_random_upload_url())
 	except DangError as e:
 		debug_print(e.args[0])
 
