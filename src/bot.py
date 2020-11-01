@@ -1,4 +1,4 @@
-import os, urllib, json, sys, string, csv
+import os, urllib, json, sys, string, csv, time, datetime
 from random import randrange, uniform, choice
 import discord as discord_api
 from dotenv import load_dotenv
@@ -22,6 +22,7 @@ YOUTUBE_SECRET_FILE = os.getenv('YOUTUBE_SECRETS_FILE')
 QUOTES_FILE = os.getenv('QUOTES_FILE')
 
 dang_channel_id = "UCQoNoTPf2FYSqM6c8sjXSZg"
+first_upload_date = datetime.datetime(2016, 5, 1)
 
 def youtube_auth(oauth = False):
 	# YOUTUBE_SECRET_FILE should be file with JSON obtained from https://console.developers.google.com/apis/credentials, OAuth 2.0-client-ID's 
@@ -104,10 +105,14 @@ def get_latest_upload_url():
 	return "https://www.youtube.com/watch?v=" + video_id
 
 def get_random_upload_url():
-	items = get_all_uploads()
-	item = choice(items)
-	video_id = item['id']['videoId']
-	return "https://www.youtube.com/watch?v=" + video_id
+    n_days = (datetime.datetime.now() - first_upload_date).days
+    random_date = first_upload_date + datetime.timedelta(days=randrange(n_days))
+    params = {'publishedAfter' : random_date.isoformat() + 'Z'}
+
+    items = get_uploads(params)
+    item = choice(items)
+    video_id = item['id']['videoId']
+    return "https://www.youtube.com/watch?v=" + video_id
 
 def get_true_random_upload_url():
 	s = ''.join(choice(string.ascii_lowercase) for i in range(10))
