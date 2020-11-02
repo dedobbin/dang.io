@@ -40,9 +40,8 @@ def get_all_uploads():
 	return get_uploads({"maxResults":"50", "channelId" : dang_channel_id}, all_pages = True)
 
 def get_true_random_upload_url():
-	s = ''.join(choice(string.ascii_lowercase) for i in range(10))
-	random_date = random_datetime_in_range(first_upload_date, datetime.datetime.now())
-
+	s = ''.join(choice(string.ascii_lowercase) for i in range(3))
+	random_date = random_datetime_in_range(datetime.datetime(2005, 4, 1), datetime.datetime.now())
 	items = youtube.search({
 		'q':s,
 		'publishedAfter': random_date.isoformat() + 'Z',
@@ -64,8 +63,8 @@ def get_random_quote():
 
 commands =  {
 	'latest' : get_latest_upload_url,
+    'echt random' : get_true_random_upload_url,
 	'random' : get_random_upload_url,
-	'echt random' : get_true_random_upload_url,
 	'mooi' : get_random_quote 
 }
 
