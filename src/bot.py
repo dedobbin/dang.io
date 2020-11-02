@@ -82,7 +82,8 @@ async def on_ready():
 		if guild.name == DISCORD_GUILD:
 			break
 
-	#print(guild.emojis)
+	# for emoji in guild.emojis:
+	# 	print(str(emoji))
 	
 	print(
 		f'{discord_client.user} is connected to the following guild:\n'
