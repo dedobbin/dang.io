@@ -2,3 +2,4 @@ src/.env
 src/youtube_secrets.json
 venv
 src/quotes.csv
+*.pyc

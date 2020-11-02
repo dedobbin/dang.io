@@ -1,103 +1,25 @@
-import os, urllib, json, sys, string, csv, time, datetime
-from random import randrange, uniform, choice
+import os, urllib, json, sys, string, csv, datetime
+from random import choice, randrange
 import discord as discord_api
-from dotenv import load_dotenv
-import google_auth_oauthlib.flow
-import googleapiclient.discovery
-import googleapiclient.errors
 import inspect
+import youtube
+from dang_error import DangError
+from helpers import debug_print, random_datetime_in_range, env
 
-debug_bool = True
 
-class DangError(Exception):
-	def __init__(self, *args):
-		self.args = [a for a in args]
 
-load_dotenv()
-
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-DISCORD_GUILD = os.getenv('DISCORD_GUILD')
-YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY');
-YOUTUBE_SECRET_FILE = os.getenv('YOUTUBE_SECRETS_FILE')
-QUOTES_FILE = os.getenv('QUOTES_FILE')
+DISCORD_TOKEN = env('DISCORD_TOKEN')
+DISCORD_GUILD = env('DISCORD_GUILD')
+QUOTES_FILE = env('QUOTES_FILE')
 
 dang_channel_id = "UCQoNoTPf2FYSqM6c8sjXSZg"
 first_upload_date = datetime.datetime(2016, 5, 1)
 
-def youtube_auth(oauth = False):
-	# YOUTUBE_SECRET_FILE should be file with JSON obtained from https://console.developers.google.com/apis/credentials, OAuth 2.0-client-ID's 
-	# YOUTUBE_API_KEY can also be obtained from there
-	api_service_name = "youtube"
-	api_version = "v3"
-
-	if oauth:
-		scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-		youtube_oath_flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(YOUTUBE_SECRET_FILE, scopes)
-		credentials = youtube_oath_flow.run_console()
-		youtube_api = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
-	else:
-		youtube_api = googleapiclient.discovery.build(api_service_name, api_version, developerKey=YOUTUBE_API_KEY)
-	
-	return youtube_api
-		
-
-youtube_api = youtube_auth()
 discord_client = discord_api.Client()
-
-def debug_print(input):
-	if (debug_bool):
-		if (isinstance(input, str)):
-			print("<DEBUG> " + input)
-		else:
-			print("<DEBUG> ")
-			print(input)
-
-def search(dynamic_params, all_pages = False):
-	static_params = {"part":"snippet"}
-
-	params = {**static_params, **dynamic_params}
-
-	num_expected = 0
-	items = []
-	try:
-		request = youtube_api.search().list(**params)
-		response = request.execute()
-		items = response['items']
-
-		num_expected = response['pageInfo']['totalResults']
-		if (all_pages):
-			try:
-				next_page = response['nextPageToken']
-				while True:
-					request = youtube_api.search().list(
-						part="snippet", 
-						#channelId=channel_id,
-						maxResults="50",
-						pageToken=next_page
-					)
-					response = request.execute()
-					items += response['items']
-					next_page = response['nextPageToken']
-			except KeyError as e:
-				pass
-	except googleapiclient.errors.HttpError as e:
-		debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
-		raise DangError("ik heb geen verbinding met youtube :cry~1:")
-	
-	if all_pages and num_expected != len(items):
-		debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
-
-	if len(items) == 0:
-		raise DangError("ik kan geen videos vinden :cry~1:")
-
-	return items
 
 def get_uploads(params, all_pages = False):
 	params ["channelId"] = dang_channel_id
-	return search(params, all_pages = all_pages)
-
-def get_all_uploads():
-	return get_uploads({"maxResults":"50", "channelId" : dang_channel_id}, all_pages = True)
+	return youtube.search(params, all_pages = all_pages)
 
 def get_latest_upload_url():
 	items = get_uploads({"maxResults": "1", "order": "date"})
@@ -105,19 +27,29 @@ def get_latest_upload_url():
 	return "https://www.youtube.com/watch?v=" + video_id
 
 def get_random_upload_url():
-    n_days = (datetime.datetime.now() - first_upload_date).days
-    random_date = first_upload_date + datetime.timedelta(days=randrange(n_days))
-    params = {'publishedAfter' : random_date.isoformat() + 'Z'}
+	random_date = random_datetime_in_range(first_upload_date, datetime.datetime.now())
+	items = get_uploads({
+		'publishedAfter': random_date.isoformat() + 'Z',
+		"maxResults": "50"
+	})
+	item = choice(items)
+	video_id = item['id']['videoId']
+	return "https://www.youtube.com/watch?v=" + video_id
 
-    items = get_uploads(params)
-    item = choice(items)
-    video_id = item['id']['videoId']
-    return "https://www.youtube.com/watch?v=" + video_id
+def get_all_uploads():
+	return get_uploads({"maxResults":"50", "channelId" : dang_channel_id}, all_pages = True)
 
 def get_true_random_upload_url():
 	s = ''.join(choice(string.ascii_lowercase) for i in range(10))
-	#items = search({'q':s}, all_pages = True)
-	items = search({'q':s}, all_pages = True)
+	random_date = random_datetime_in_range(first_upload_date, datetime.datetime.now())
+
+	items = youtube.search({
+		'q':s,
+		'publishedAfter': random_date.isoformat() + 'Z',
+		"maxResults": "50"
+	})
+
+	item = choice(items)
 	video_id = item['id']['videoId']
 	return "https://www.youtube.com/watch?v=" + video_id
 
@@ -128,6 +60,7 @@ def get_random_quote():
 		for row in reader:
 			poetic_quotes.append(row[0])
 	return choice(poetic_quotes)
+
 
 commands =  {
 	'latest' : get_latest_upload_url,
@@ -140,15 +73,17 @@ commands =  {
 async def on_ready():
 	print(get_random_quote())
 	
-	try:
-		debug_print(get_random_upload_url())
-	except DangError as e:
-		debug_print(e.args[0])
+	# try:
+	# 	debug_print(get_true_random_upload_url())
+	# except DangError as e:
+	# 	debug_print(e.args[0])
 
 	for guild in discord_client.guilds:
 		if guild.name == DISCORD_GUILD:
 			break
 
+	#print(guild.emojis)
+	
 	print(
 		f'{discord_client.user} is connected to the following guild:\n'
 		f'{guild.name}(id: {guild.id})'
@@ -156,7 +91,7 @@ async def on_ready():
 
 @discord_client.event
 async def on_message(message):
-	if message.author == discord_api.Client().user:
+	if(message.author.bot):
 		return
 
 	debug_print("message received: " + message.content)
