@@ -29,13 +29,19 @@ def get_random_quote():
 			poetic_quotes.append(row[0])
 	return choice(poetic_quotes)
 
+def get_videos(params = {}):
+	items = youtube.search(params)
+	if (len(items) == 0):
+		raise DangError('ik kan geen videos vinden <:cry:770284714481025087>')
+	return items
+
 @bot.command(name='mooi')
 async def send_quote(ctx):
     await ctx.send(get_random_quote())
 
 @bot.command(name='latest')
 async def send_latest_upload_url(ctx):
-	items = youtube.search({
+	items = get_videos({
 		'channelId': channel_id,
 		'maxResults': '1',
 		'order': 'date'
@@ -46,11 +52,12 @@ async def send_latest_upload_url(ctx):
 
 @bot.command(name='zoek')
 async def search(ctx, *params):
+	#TODO: breaks on search query 'een' ?? why
 	if len(params) == 0:
 		debug_print("search without params, aborting..")
 		return
 
-	items = youtube.search({
+	items = get_videos({
 		'q': ' '.join(params),
 		'maxResults': '1',
 	})
@@ -90,14 +97,18 @@ async def send_random(ctx, param = None):
 		debug_print("Unknown param for search: " + param)
 		return
 
-	items = youtube.search(search_params)
+	items = get_videos(search_params)
 	video_id = choice(items)['id']['videoId']
 	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
 @bot.event
 async def on_command_error(ctx, error):
 	debug_print(error)
-    await ctx.send('er is iets niet goed gegaan')
+	#bit hacky..
+	if "DangError" in str(error):
+		await ctx.send(str(error).split("Command raised an exception: DangError:")[1])
+	else:
+		await ctx.send('er is iets niet goed gegaan')
 
 @bot.event
 async def on_ready():
