@@ -63,7 +63,4 @@ def search(dynamic_params, all_pages = False):
 	if all_pages and num_expected != len(items):
 		debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
 
-	if len(items) == 0:
-		raise DangError("ik kan geen videos vinden <:cry:770284714481025087>")
-
 	return items
