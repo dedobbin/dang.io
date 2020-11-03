@@ -94,6 +94,10 @@ async def send_random(ctx, param = None):
 	video_id = choice(items)['id']['videoId']
 	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
+@bot.event
+async def on_command_error(ctx, error):
+	debug_print(error)
+    await ctx.send('er is iets niet goed gegaan')
 
 @bot.event
 async def on_ready():
