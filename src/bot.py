@@ -32,7 +32,7 @@ def get_random_quote():
 def get_videos(params = {}):
 	items = youtube.search(params)
 	if (len(items) == 0):
-		raise DangError('ik kan geen videos vinden <:cry:770284714481025087>')
+		raise DangError('ik kan het niet vinden <:cry:770284714481025087>')
 	return items
 
 @bot.command(name='mooi')
@@ -44,7 +44,8 @@ async def send_latest_upload_url(ctx):
 	items = get_videos({
 		'channelId': channel_id,
 		'maxResults': '1',
-		'order': 'date'
+		'order': 'date',
+		'type': 'video'
 	})
 	item = items[0]
 	video_id = item['id']['videoId']
@@ -60,6 +61,7 @@ async def search(ctx, *params):
 	items = get_videos({
 		'q': ' '.join(params),
 		'maxResults': '1',
+		'type': 'video'
 	})
 	item = items[0]
 	video_id = item['id']['videoId']
@@ -68,7 +70,8 @@ async def search(ctx, *params):
 @bot.command(name='random')
 async def send_random(ctx, param = None):
 	search_params = {
-		'maxResults': '50'
+		'maxResults': '50',
+		'type': 'video'
 	}
 	
 	if not param:
@@ -113,33 +116,33 @@ async def on_command_error(ctx, error):
 @bot.event
 async def on_ready():
 	print(get_random_quote())
-	
-	# try:
-	# 	debug_print(get_true_random_upload_url())
-	# except DangError as e:
-	# 	debug_print(e.args[0])
-
-	# for emoji in guild.emojis:
-	# 	print(str(emoji))
 
 	for guild in bot.guilds:
 		if guild.name == DISCORD_GUILD:
 			break
+
+	# for emoji in guild.emojis:
+	# 	print(str(emoji))
 
 	print(
 		f'{bot.user} is connected to the following guild:\n'
 		f'{guild.name}(id: {guild.id})'
 	)
 
-# @bot.event
-# async def on_message(message):
-# 	if(message.author.bot):
-# 		return
+@bot.event
+async def on_message(message):
+	if(message.author.bot):
+		return
 
-# 	debug_print("message received: " + message.content)
+	debug_print("message received: " + message.content)
 
-# 	elif randrange(0, 40) == 5:
-# 		await message.channel.send(get_random_quote())
+	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
+		await message.channel.send("<:dangs_up2:770278554931429416>")
 
+	elif randrange(0, 30) == 5:
+		await message.channel.send(get_random_quote())
+		await message.channel.send("<:dangs_up2:770278554931429416>")
+
+	await bot.process_commands(message)
 
 bot.run(DISCORD_TOKEN)
