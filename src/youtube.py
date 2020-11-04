@@ -10,7 +10,7 @@ from dang_error import DangError
 class Youtube(commands.Cog):
 	youtube_api = None
 
-	def __init__(self, bot, defaul_channel_dict = {}):
+	def __init__(self, bot, defaul_channel_dict):
 		self.bot = bot
 		self.default_channel = defaul_channel_dict
 
