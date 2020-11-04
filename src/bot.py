@@ -16,9 +16,9 @@ default_channel = {
 	'first_upload_date':  datetime.datetime(2016, 5, 1)
 }
 
-emojis = {}
-
 bot = commands.Bot(command_prefix='!')
+
+guild = None
 
 def get_random_quote():
 	poetic_quotes = []
@@ -29,11 +29,13 @@ def get_random_quote():
 	return choice(poetic_quotes)
 
 def get_emoji(name):
-	try :
-		return emojis[name]
-	except KeyError as e:
-		debug_print('couldn not find emoji ' + name)
-		return ''
+	for emoji in guild.emojis:
+		#emojis[emoji.name] = str(emoji)
+		if emoji.name == name:
+			return str(emoji)
+	
+	debug_print('couldn not find emoji ' + name)
+	return ''
 
 @bot.command(name='mooi')
 async def send_quote(ctx):
@@ -113,14 +115,13 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_ready():
+	global guild
+
 	print(get_random_quote())
 
 	for guild in bot.guilds:
 		if guild.name == DISCORD_GUILD:
 			break
-
-	for emoji in guild.emojis:
-		emojis[emoji.name] = str(emoji)
 
 	print(
 		f'{bot.user} is connected to the following guild:\n'
