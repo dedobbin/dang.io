@@ -1,4 +1,4 @@
-import os, urllib, json, sys, string, csv, datetime
+import os, json, sys, string, csv, datetime
 from random import choice, randrange
 import discord as discord_api
 from discord.ext import commands
