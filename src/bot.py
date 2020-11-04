@@ -104,14 +104,17 @@ async def send_random(ctx, param = None):
 	video_id = choice(items)['id']['videoId']
 	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
+@bot.command(name='test')
+async def test(ctx):
+	raise DangError("dsfjsdjfsdf")
+
 @bot.event
 async def on_command_error(ctx, error):
-	debug_print(error)
-	#bit hacky..
-	if "DangError" in str(error):
-		await ctx.send(str(error).split("Command raised an exception: DangError:")[1])
-	else:
-		await ctx.send('er is iets niet goed gegaan')
+    debug_print(error)
+    if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
+        await ctx.send(str(error.original))
+    else:
+        await ctx.send('er is iets niet goed gegaan')
 
 @bot.event
 async def on_ready():
