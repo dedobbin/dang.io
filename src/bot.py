@@ -3,7 +3,7 @@ from random import choice, randrange
 import discord as discord_api
 from discord.ext import commands
 import inspect
-import youtube
+from youtube import Youtube
 from dang_error import DangError
 from helpers import debug_print, random_datetime_in_range, env
 
@@ -17,8 +17,8 @@ default_channel = {
 }
 
 bot = commands.Bot(command_prefix='!')
-
 guild = None
+youtube = Youtube()
 
 def get_random_quote():
 	poetic_quotes = []
