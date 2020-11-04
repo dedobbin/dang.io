@@ -11,15 +11,12 @@ DISCORD_TOKEN = env('DISCORD_TOKEN')
 DISCORD_GUILD = env('DISCORD_GUILD')
 QUOTES_FILE = env('QUOTES_FILE')
 
-channel_id = "UCQoNoTPf2FYSqM6c8sjXSZg"
-first_upload_date = datetime.datetime(2016, 5, 1)
+default_channel = {
+	'id': 'UCQoNoTPf2FYSqM6c8sjXSZg',
+	'first_upload_date':  datetime.datetime(2016, 5, 1)
+}
 
 bot = commands.Bot(command_prefix='!')
-
-# @bot.command(name='wakker')
-# async def nine_nine(ctx):
-#     debug_print('aaa')
-#     await ctx.send('bruh')
 
 def get_random_quote():
 	poetic_quotes = []
@@ -29,20 +26,14 @@ def get_random_quote():
 			poetic_quotes.append(row[0])
 	return choice(poetic_quotes)
 
-def get_videos(params = {}):
-	items = youtube.search(params)
-	if (len(items) == 0):
-		raise DangError('ik kan het niet vinden <:cry:770284714481025087>')
-	return items
-
 @bot.command(name='mooi')
 async def send_quote(ctx):
     await ctx.send(get_random_quote())
 
 @bot.command(name='latest')
 async def send_latest_upload_url(ctx):
-	items = get_videos({
-		'channelId': channel_id,
+	items = youtube.search({
+		'channelId': default_channel['id'],
 		'maxResults': '1',
 		'order': 'date',
 		'type': 'video'
@@ -58,7 +49,7 @@ async def search(ctx, *params):
 		debug_print("search without params, aborting..")
 		return
 
-	items = get_videos({
+	items = youtube.search({
 		'q': ' '.join(params),
 		'maxResults': '1',
 		'type': 'video'
@@ -77,11 +68,11 @@ async def send_random(ctx, param = None):
 	if not param:
 		#get from channel
 		random_date = random_datetime_in_range(
-			first_upload_date, 
+			default_channel['first_upload_date'], 
 			datetime.datetime.now()
 		).isoformat() + 'Z'
 
-		search_params['channelId'] = channel_id
+		search_params['channelId'] = default_channel['id']
 		search_params['publishedAfter'] = random_date
 	
 	elif param == 'echt':
@@ -100,7 +91,7 @@ async def send_random(ctx, param = None):
 		debug_print("Unknown param for search: " + param)
 		return
 
-	items = get_videos(search_params)
+	items = youtube.search(search_params)
 	video_id = choice(items)['id']['videoId']
 	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 

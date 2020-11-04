@@ -3,6 +3,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from helpers import debug_print, env
+from dang_error import DangError
 
 youtube_api = None
 
@@ -46,7 +47,7 @@ def search(dynamic_params, all_pages = False):
 				while True:
 					request = youtube_api.search().list(
 						part="snippet", 
-						#channelId=channel_id,
+						#channelId=default_flavor['id'],
 						maxResults="50",
 						pageToken=next_page
 					)
@@ -59,6 +60,9 @@ def search(dynamic_params, all_pages = False):
 		debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
 		raise DangError("ik heb geen verbinding met youtube <:cry:770284714481025087>")
 	
+	if len(items) == 0:
+		raise DangError("ik kan niks vinden <:cry:770284714481025087>")
+
 	if all_pages and num_expected != len(items):
 		debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
 
