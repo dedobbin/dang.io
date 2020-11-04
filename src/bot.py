@@ -5,7 +5,7 @@ from discord.ext import commands
 import inspect
 from youtube import Youtube
 from dang_error import DangError
-from helpers import debug_print, random_datetime_in_range, env
+from helpers import debug_print, env
 
 DISCORD_TOKEN = env('DISCORD_TOKEN')
 DISCORD_GUILD = env('DISCORD_GUILD')
@@ -17,8 +17,8 @@ default_channel = {
 }
 
 bot = commands.Bot(command_prefix='!')
+bot.add_cog(Youtube(bot, default_channel))
 guild = None
-youtube = Youtube()
 
 def get_random_quote():
 	poetic_quotes = []
@@ -40,70 +40,6 @@ def get_emoji(name):
 @bot.command(name='mooi')
 async def send_quote(ctx):
     await ctx.send(get_random_quote())
-
-@bot.command(name='latest')
-async def send_latest_upload_url(ctx):
-	items = youtube.search({
-		'channelId': default_channel['id'],
-		'maxResults': '1',
-		'order': 'date',
-		'type': 'video'
-	})
-	item = items[0]
-	video_id = item['id']['videoId']
-	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
-
-@bot.command(name='zoek')
-async def search(ctx, *params):
-	if len(params) == 0:
-		debug_print("search without params, aborting..")
-		return
-
-	items = youtube.search({
-		'q': ' '.join(params),
-		'maxResults': '1',
-		'type': 'video'
-	})
-	item = items[0]
-	video_id = item['id']['videoId']
-	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
-
-@bot.command(name='random')
-async def send_random(ctx, param = None):
-	search_params = {
-		'maxResults': '50',
-		'type': 'video'
-	}
-	
-	if not param:
-		#get from channel
-		random_date = random_datetime_in_range(
-			default_channel['first_upload_date'], 
-			datetime.datetime.now()
-		).isoformat() + 'Z'
-
-		search_params['channelId'] = default_channel['id']
-		search_params['publishedAfter'] = random_date
-	
-	elif param == 'echt':
-		#get anything from youtube
-		random_date = random_datetime_in_range(
-			datetime.datetime(2005, 4, 1), 
-			datetime.datetime.now()
-		).isoformat() + 'Z'
-		
-		random_string = ''.join(choice(string.ascii_lowercase) for i in range(3))
-
-		search_params['publishedAfter'] = random_date
-		search_params['q'] = random_string
-	
-	else:
-		debug_print("Unknown param for search: " + param)
-		return
-
-	items = youtube.search(search_params)
-	video_id = choice(items)['id']['videoId']
-	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
 @bot.event
 async def on_command_error(ctx, error):

@@ -1,12 +1,18 @@
-import sys, os
+import sys, os, string, datetime
+from random import choice
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
-from helpers import debug_print, env
+from discord.ext import commands
+from helpers import debug_print, env, random_datetime_in_range
 from dang_error import DangError
 
-class Youtube:
+class Youtube(commands.Cog):
 	youtube_api = None
+
+	def __init__(self, bot, defaul_channel_dict = {}):
+		self.bot = bot
+		self.default_channel = defaul_channel_dict
 
 	def youtube_auth(self, oauth = False):
 		api_service_name = "youtube"
@@ -67,3 +73,67 @@ class Youtube:
 			debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
 
 		return items
+
+	@commands.command(name='latest', pass_context=True)
+	async def send_latest_upload_url(self, ctx):
+		items = self.search({
+			'channelId': self.default_channel['id'],
+			'maxResults': '1',
+			'order': 'date',
+			'type': 'video'
+		})
+		item = items[0]
+		video_id = item['id']['videoId']
+		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
+
+	@commands.command(name='zoek', pass_context=True)
+	async def send_search_result(self, ctx, *params):
+		if len(params) == 0:
+			debug_print("search without params, aborting..")
+			return
+
+		items = self.search({
+			'q': ' '.join(params),
+			'maxResults': '1',
+			'type': 'video'
+		})
+		item = items[0]
+		video_id = item['id']['videoId']
+		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
+
+	@commands.command(name='random', pass_context=True)
+	async def send_random(self, ctx, param = None):
+		search_params = {
+			'maxResults': '50',
+			'type': 'video'
+		}
+		
+		if not param:
+			#get from channel
+			random_date = random_datetime_in_range(
+				self.default_channel['first_upload_date'], 
+				datetime.datetime.now()
+			).isoformat() + 'Z'
+
+			search_params['channelId'] = self.default_channel['id']
+			search_params['publishedAfter'] = random_date
+		
+		elif param == 'echt':
+			#get anything from youtube
+			random_date = random_datetime_in_range(
+				datetime.datetime(2005, 4, 1), 
+				datetime.datetime.now()
+			).isoformat() + 'Z'
+			
+			random_string = ''.join(choice(string.ascii_lowercase) for i in range(3))
+
+			search_params['publishedAfter'] = random_date
+			search_params['q'] = random_string
+		
+		else:
+			debug_print("Unknown param for search: " + param)
+			return
+
+		items = self.search(search_params)
+		video_id = choice(items)['id']['videoId']
+		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
