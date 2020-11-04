@@ -58,10 +58,10 @@ def search(dynamic_params, all_pages = False):
 				pass
 	except googleapiclient.errors.HttpError as e:
 		debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
-		raise DangError("ik heb geen verbinding met youtube <:cry:770284714481025087>")
+		raise DangError('ik heb geen verbinding met youtube')
 	
 	if len(items) == 0:
-		raise DangError("ik kan niks vinden <:cry:770284714481025087>")
+		raise DangError('ik kan niks vinden')
 
 	if all_pages and num_expected != len(items):
 		debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")

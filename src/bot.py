@@ -16,6 +16,8 @@ default_channel = {
 	'first_upload_date':  datetime.datetime(2016, 5, 1)
 }
 
+emojis = {}
+
 bot = commands.Bot(command_prefix='!')
 
 def get_random_quote():
@@ -25,6 +27,13 @@ def get_random_quote():
 		for row in reader:
 			poetic_quotes.append(row[0])
 	return choice(poetic_quotes)
+
+def get_emoji(name):
+	try :
+		return emojis[name]
+	except KeyError as e:
+		debug_print('couldn not find emoji ' + name)
+		return ''
 
 @bot.command(name='mooi')
 async def send_quote(ctx):
@@ -44,7 +53,6 @@ async def send_latest_upload_url(ctx):
 
 @bot.command(name='zoek')
 async def search(ctx, *params):
-	#TODO: breaks on search query 'een' ?? why
 	if len(params) == 0:
 		debug_print("search without params, aborting..")
 		return
@@ -95,17 +103,13 @@ async def send_random(ctx, param = None):
 	video_id = choice(items)['id']['videoId']
 	await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
-@bot.command(name='test')
-async def test(ctx):
-	raise DangError("dsfjsdjfsdf")
-
 @bot.event
 async def on_command_error(ctx, error):
     debug_print(error)
     if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-        await ctx.send(str(error.original))
+        await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
     else:
-        await ctx.send('er is iets niet goed gegaan')
+        await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
 
 @bot.event
 async def on_ready():
@@ -115,8 +119,8 @@ async def on_ready():
 		if guild.name == DISCORD_GUILD:
 			break
 
-	# for emoji in guild.emojis:
-	# 	print(str(emoji))
+	for emoji in guild.emojis:
+		emojis[emoji.name] = str(emoji)
 
 	print(
 		f'{bot.user} is connected to the following guild:\n'
@@ -131,11 +135,11 @@ async def on_message(message):
 	debug_print("message received: " + message.content)
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
-		await message.channel.send("<:dangs_up2:770278554931429416>")
+		await message.channel.send(get_emoji('dangs_up2'))
 
 	elif randrange(0, 30) == 5:
 		await message.channel.send(get_random_quote())
-		await message.channel.send("<:dangs_up2:770278554931429416>")
+		await message.channel.send(get_emoji('dangs_up2'))
 
 	await bot.process_commands(message)
 
