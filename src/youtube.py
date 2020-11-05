@@ -17,6 +17,7 @@ class Youtube(commands.Cog):
 		self.bot = bot
 		self.default_channel  = default_channel
 		self.youtube_api = None
+		self.last_search_result = None
 
 	def youtube_auth(self, oauth = False):
 		api_service_name = "youtube"
@@ -69,12 +70,14 @@ class Youtube(commands.Cog):
 		except googleapiclient.errors.HttpError as e:
 			debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
 			raise DangError('ik heb geen verbinding met youtube')
-		
-		if len(items) == 0:
-			raise DangError('ik kan niks vinden')
 
 		if all_pages and num_expected != len(items):
 			debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
+
+		self.last_search_result = {'result': response, 'params': params}
+		
+		if len(items) == 0:
+			raise DangError('ik kan niks vinden')
 
 		return items
 
@@ -82,7 +85,7 @@ class Youtube(commands.Cog):
 	async def send_latest_upload_url(self, ctx):
 		items = self.search({
 			'channelId': self.default_channel.id,
-			'maxResults': '1',
+			'maxResults': '25',
 			'order': 'date',
 			'type': 'video'
 		})
@@ -98,7 +101,7 @@ class Youtube(commands.Cog):
 
 		items = self.search({
 			'q': ' '.join(params),
-			'maxResults': '1',
+			'maxResults': '25',
 			'type': 'video'
 		})
 		item = items[0]
