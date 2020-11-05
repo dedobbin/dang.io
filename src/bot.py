@@ -3,7 +3,7 @@ from random import choice, randrange
 import discord as discord_api
 from discord.ext import commands
 import inspect
-from youtube import Youtube
+from youtube import Youtube, YoutubeChannel
 from dang_error import DangError
 from helpers import debug_print, env
 
@@ -11,10 +11,10 @@ DISCORD_TOKEN = env('DISCORD_TOKEN')
 DISCORD_GUILD = env('DISCORD_GUILD')
 QUOTES_FILE = env('QUOTES_FILE')
 
-default_channel = {
-	'id': 'UCQoNoTPf2FYSqM6c8sjXSZg',
-	'first_upload_date':  datetime.datetime(2016, 5, 1)
-}
+
+d,m,y = env('DEFAULT_CHANNEL_FIRST_UPLOAD_DATE').split('-')
+first_upload_date = datetime.datetime(int(d), int(m), int(y))
+default_channel = YoutubeChannel(env('DEFAULT_CHANNEL_ID'),first_upload_date)
 
 bot = commands.Bot(command_prefix='!')
 bot.add_cog(Youtube(bot, default_channel))
@@ -74,7 +74,7 @@ async def on_message(message):
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
 		await message.channel.send(get_emoji('dangs_up2'))
 
-	elif randrange(0, 30) == 5:
+	elif randrange(0, 60) == 5:
 		await message.channel.send(get_random_quote())
 		await message.channel.send(get_emoji('dangs_up2'))
 

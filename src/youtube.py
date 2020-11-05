@@ -7,12 +7,16 @@ from discord.ext import commands
 from helpers import debug_print, env, random_datetime_in_range
 from dang_error import DangError
 
-class Youtube(commands.Cog):
-	youtube_api = None
+class YoutubeChannel:
+	def __init__(self, id, first_upload_datetime = datetime.datetime(2005, 4, 1)):
+		self.id = id
+		self.first_upload_datetime = first_upload_datetime
 
-	def __init__(self, bot, defaul_channel_dict):
+class Youtube(commands.Cog):
+	def __init__(self, bot, default_channel):
 		self.bot = bot
-		self.default_channel = defaul_channel_dict
+		self.default_channel  = default_channel
+		self.youtube_api = None
 
 	def youtube_auth(self, oauth = False):
 		api_service_name = "youtube"
@@ -77,7 +81,7 @@ class Youtube(commands.Cog):
 	@commands.command(name='latest', pass_context=True)
 	async def send_latest_upload_url(self, ctx):
 		items = self.search({
-			'channelId': self.default_channel['id'],
+			'channelId': self.default_channel.id,
 			'maxResults': '1',
 			'order': 'date',
 			'type': 'video'
@@ -111,11 +115,11 @@ class Youtube(commands.Cog):
 		if not param:
 			#get from channel
 			random_date = random_datetime_in_range(
-				self.default_channel['first_upload_date'], 
+				self.default_channel.first_upload_date, 
 				datetime.datetime.now()
 			).isoformat() + 'Z'
 
-			search_params['channelId'] = self.default_channel['id']
+			search_params['channelId'] = self.default_channel.id
 			search_params['publishedAfter'] = random_date
 		
 		elif param == 'echt':
