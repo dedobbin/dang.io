@@ -17,7 +17,9 @@ class Youtube(commands.Cog):
 		self.bot = bot
 		self.default_channel  = default_channel
 		self.youtube_api = None
-		self.last_search_result = None
+
+		# maps search results to sent message ID after sending, so can look up when reaction on message comes in 
+		self.video_messages = {}
 
 	def youtube_auth(self, oauth = False):
 		api_service_name = "youtube"
@@ -35,7 +37,8 @@ class Youtube(commands.Cog):
 			self.youtube_api = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
 		else:
 			self.youtube_api = googleapiclient.discovery.build(api_service_name, api_version, developerKey=YOUTUBE_API_KEY)
-
+	
+	# Adds search result to history + returns index key of entry in history
 	def search(self, dynamic_params, all_pages = False):
 		if self.youtube_api == None:
 			self.youtube_auth()
@@ -74,23 +77,30 @@ class Youtube(commands.Cog):
 		if all_pages and num_expected != len(items):
 			debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
 
-		self.last_search_result = {'result': response, 'params': params}
+		#self.search_results.append({'result': response, 'params': params})
 		
 		if len(items) == 0:
 			raise DangError('ik kan niks vinden')
 
-		return items
+		return response
+
+	
+	################# send functions #################
 
 	@commands.command(name='latest', pass_context=True)
 	async def send_latest_upload_url(self, ctx):
-		items = self.search({
+		search_params = {
 			'channelId': self.default_channel.id,
 			'maxResults': '25',
 			'order': 'date',
 			'type': 'video'
-		})
-		item = items[0]
-		video_id = item['id']['videoId']
+		}
+
+		result = self.search(search_params)
+
+		result = self.search(search_params)
+		items = result['items'][0]
+		video_id = choice(items)['id']['videoId']
 		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
 	@commands.command(name='zoek', pass_context=True)
@@ -99,13 +109,15 @@ class Youtube(commands.Cog):
 			debug_print("search without params, aborting..")
 			return
 
-		items = self.search({
+		search_params = {
 			'q': ' '.join(params),
 			'maxResults': '25',
 			'type': 'video'
-		})
-		item = items[0]
-		video_id = item['id']['videoId']
+		}
+
+		result = self.search(search_params)
+		items = result['items']	
+		video_id = choice(items)['id']['videoId']
 		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
 	@commands.command(name='random', pass_context=True)
@@ -141,6 +153,8 @@ class Youtube(commands.Cog):
 			debug_print("Unknown param for search: " + param)
 			return
 
-		items = self.search(search_params)
+		result = self.search(search_params)
+		items = result['items']	
 		video_id = choice(items)['id']['videoId']
 		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
+		

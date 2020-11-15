@@ -19,7 +19,6 @@ default_channel = YoutubeChannel(env('DEFAULT_CHANNEL_ID'),first_upload_date)
 bot = commands.Bot(command_prefix='!')
 bot.add_cog(Youtube(bot, default_channel))
 guild = None
-last_video_message_sent = None
 
 def get_random_quote():
 	poetic_quotes = []
@@ -42,35 +41,37 @@ def get_emoji(name):
 async def send_quote(ctx):
     await ctx.send(get_random_quote())
 
-@bot.event
-async def on_command_error(ctx, error):
-    debug_print(error)
-    if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-        await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
-    else:
-        await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
+# @bot.event
+# async def on_command_error(ctx, error):
+#     debug_print(error)
+#     if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
+#         await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
+#     else:
+#         await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
 
 @bot.event
 async def on_reaction_add(reaction, user):
-	global last_video_message_sent
-	
-	if reaction.message.id == last_video_message_sent.id:
-		if '👎' in str(reaction):
-			await reaction.message.channel.send('sorry, ik zal de volgende sturen ' + get_emoji('uh'))
-			#TODO: place function in youtube module
-			#TODO: actually iterate instead of static 1
-			#TODO: instead of key error, check if there is another result
-			#TODO: test next page
-			#TODO: check if there is a next page
-			#TODO: when searched random, get a new random result instead of next???
-			#TODO: video_id_to_url
-			yt = bot.get_cog('Youtube')
-			try:
-				video_id = yt.last_search_result['result']['items'][1]['id']['videoId']
-			except KeyError as e:
-				next_page_token = yt.last_search_result['result']['nextPageToken']
-				video_id = yt.search({**yt.yt.last_search_result['params'], 'nextPageToken': next_page_token})[0]
-			await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
+	#TODO: search history tied to sent message id
+	#TODO: place function in youtube module
+	#TODO: actually iterate instead of static 1
+	#TODO: test next
+	#TODO: instead of key error, check if there is another result
+	#TODO: test next page
+	#TODO: check if there is a next page
+	#TODO: when searched random, get a new random result instead of next???
+	#TODO: video_id_to_url
+	return
+
+	# if reaction.message.id == last_video_message_sent.id:
+	# 	if '👎' in str(reaction):
+	# 		await reaction.message.channel.send('sorry, ik zal de volgende sturen ' + get_emoji('uh'))
+	# 		yt = bot.get_cog('Youtube')
+	# 		try:
+	# 			video_id = yt.last_search_result['result']['items'][1]['id']['videoId']
+	# 		except KeyError as e:
+	# 			next_page_token = yt.last_search_result['result']['nextPageToken']
+	# 			video_id = yt.search({**yt.yt.last_search_result['params'], 'nextPageToken': next_page_token})[0]
+	# 		await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
 
 @bot.event
 async def on_ready():
