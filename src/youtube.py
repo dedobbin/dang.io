@@ -16,12 +16,22 @@ class SearchResult:
 	def __init__(self, result, params):
 		self.params = params
 		self.result = result
+		
+		# points to last accessed item, so can get next etc
+		self.cursor = None
 
 	def random_item(self):
-		return choice(self.result['items'])
+		self.cursor = randrange(0, len(self.results['items']))
+		return self.result['items'][self.cursor]
 
 	def first_item(self):
-		return self.result['items'][0]
+		self.cursor = 0
+		return self.result['items'][self.cursor]
+
+	def next_item(self):
+		#TODO: check if next, get next page, if no next page send message
+		self.cursor += 1
+		return self.result['items'][self.cursor]
 
 class Youtube(commands.Cog):
 	def __init__(self, bot, default_channel):
@@ -170,7 +180,6 @@ class Youtube(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_reaction_add(self, reaction, user):
-		#TODO: proper next function (including next page)
 		#TODO: video_id_to_url
 		#TODO: when searched random, get a new random result instead of next???
 		
@@ -180,9 +189,11 @@ class Youtube(commands.Cog):
 				associated_search_result = self.video_messages[reaction.message.id]
 				await reaction.message.channel.send('sorry, ik zal de volgende sturen')
 				#TODO: get next
-				next_video = associated_search_result.result['items'][1]
+				next_video = associated_search_result.next_item()
 				video_id = next_video['id']['videoId']
-				await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
+				message = await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
+				self.video_messages[message.id] = associated_search_result
+
 
 		except KeyError as e:
 			pass
