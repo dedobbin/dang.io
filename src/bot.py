@@ -41,13 +41,13 @@ def get_emoji(name):
 async def send_quote(ctx):
     await ctx.send(get_random_quote())
 
-# @bot.event
-# async def on_command_error(ctx, error):
-#     debug_print(error)
-#     if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-#         await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
-#     else:
-#         await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
+@bot.event
+async def on_command_error(ctx, error):
+    debug_print(error)
+    if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
+        await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
+    else:
+        await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
 
 @bot.event
 async def on_ready():

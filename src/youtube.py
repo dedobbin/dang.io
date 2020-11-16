@@ -57,6 +57,7 @@ class Youtube(commands.Cog):
 
 		# maps search results to sent message ID after sending, so can look up when reaction on message comes in 
 		self.video_messages = {}
+		self.max_video_message_history = 10
 
 	def youtube_auth(self, oauth = False):
 		api_service_name = "youtube"
@@ -212,4 +213,8 @@ class Youtube(commands.Cog):
 		message = await channel.send('https://www.youtube.com/watch?v=' + video_id)
 
 		if search_result:
+			if len(self.video_messages) >= self.max_video_message_history:
+				# key 0 is lowest message ID, so oldest, remove that one..
+				del self.video_messages[list(self.video_messages.keys())[0]]
 			self.video_messages[message.id] = search_result
+			debug_print(len(self.video_messages))
