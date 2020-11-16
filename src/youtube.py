@@ -28,10 +28,18 @@ class SearchResult:
 		self.cursor = 0
 		return self.result['items'][self.cursor]
 
-	def next_item(self):
-		#TODO: check if next, get next page, if no next page send message
+	def next_item(self, search_callback):
 		self.cursor += 1
-		return self.result['items'][self.cursor]
+		try:
+			raise KeyError
+			item = self.result['items'][self.cursor]
+		except KeyError as e:
+			#TODO: handle if no next page
+			self.params['pageToken'] = self.result['nextPageToken']
+			self.result = search_callback(self.params).result
+			item = self.first_item()
+
+		return item
 
 class Youtube(commands.Cog):
 	def __init__(self, bot, default_channel):
@@ -184,7 +192,7 @@ class Youtube(commands.Cog):
 			if '👎' in str(reaction):
 				associated_search_result = self.video_messages[reaction.message.id]
 				await reaction.message.channel.send('sorry, ik zal de volgende sturen')
-				next_video = associated_search_result.next_item()
+				next_video = associated_search_result.next_item(self.search)
 				await self.send_video(reaction.message.channel, next_video, associated_search_result)
 
 		except KeyError as e:
