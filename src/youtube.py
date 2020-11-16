@@ -12,6 +12,18 @@ class YoutubeChannel:
 		self.id = id
 		self.first_upload_datetime = first_upload_datetime
 
+class SearchResult:
+	def __init__(self, result, params):
+		self.params = params
+		self.result = result
+
+	def random_item(self):
+		return choice(self.result['items'])
+
+	def first_item(self):
+		return self.result['items'][0]
+
+
 class Youtube(commands.Cog):
 	def __init__(self, bot, default_channel):
 		self.bot = bot
@@ -82,7 +94,7 @@ class Youtube(commands.Cog):
 		if len(items) == 0:
 			raise DangError('ik kan niks vinden')
 
-		return response
+		return SearchResult(response, params)
 
 	
 	################# send functions #################
@@ -97,10 +109,7 @@ class Youtube(commands.Cog):
 		}
 
 		result = self.search(search_params)
-
-		result = self.search(search_params)
-		items = result['items'][0]
-		video_id = choice(items)['id']['videoId']
+		video_id = result.first_item()['id']['videoId']
 		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
 	@commands.command(name='zoek', pass_context=True)
@@ -116,8 +125,7 @@ class Youtube(commands.Cog):
 		}
 
 		result = self.search(search_params)
-		items = result['items']	
-		video_id = choice(items)['id']['videoId']
+		video_id = result.random_item()['id']['videoId']
 		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 
 	@commands.command(name='random', pass_context=True)
@@ -130,7 +138,7 @@ class Youtube(commands.Cog):
 		if not param:
 			#get from channel
 			random_date = random_datetime_in_range(
-				self.default_channel.first_upload_date, 
+				self.default_channel.first_upload_datetime, 
 				datetime.datetime.now()
 			).isoformat() + 'Z'
 
@@ -154,7 +162,6 @@ class Youtube(commands.Cog):
 			return
 
 		result = self.search(search_params)
-		items = result['items']	
-		video_id = choice(items)['id']['videoId']
+		video_id = result.random_item()['id']['videoId']
 		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 		
