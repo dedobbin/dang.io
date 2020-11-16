@@ -12,7 +12,7 @@ class YoutubeChannel:
 		self.id = id
 		self.first_upload_datetime = first_upload_datetime
 
-class SearchResult:
+class SearchResult: 
 	def __init__(self, result, params):
 		self.params = params
 		self.result = result
@@ -21,23 +21,31 @@ class SearchResult:
 		self.cursor = None
 
 	def random_item(self):
+		if len(self.result['items']) == 0:
+			raise DangError("geen videos gevonden???")
+		
 		self.cursor = randrange(0, len(self.result['items']))
 		return self.result['items'][self.cursor]
 
 	def first_item(self):
+		if len(self.result['items']) == 0:
+			raise DangError("geen videos gevonden???")
+		
 		self.cursor = 0
 		return self.result['items'][self.cursor]
 
 	def next_item(self, search_callback):
 		self.cursor += 1
 		try:
-			raise KeyError
 			item = self.result['items'][self.cursor]
 		except KeyError as e:
-			#TODO: handle if no next page
-			self.params['pageToken'] = self.result['nextPageToken']
-			self.result = search_callback(self.params).result
-			item = self.first_item()
+			try:
+				self.params['pageToken'] = self.result['nextPageToken']
+				self.result = search_callback(self.params).result
+				item = self.first_item()
+			except KeyError as e:
+				raise DangError("de videos zijn op")
+			
 
 		return item
 
