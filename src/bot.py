@@ -60,18 +60,19 @@ async def on_reaction_add(reaction, user):
 	#TODO: check if there is a next page
 	#TODO: when searched random, get a new random result instead of next???
 	#TODO: video_id_to_url
-	return
+	
+	yt = bot.get_cog("Youtube")
+	try:
+		if '👎' in str(reaction):
+			associated_search_result = yt.video_messages[reaction.message.id]
+			await reaction.message.channel.send('sorry, ik zal de volgende sturen ' + get_emoji('uh'))
+			#TODO: get next
+			next_video = associated_search_result.result['items'][1]
+			video_id = next_video['id']['videoId']
+			await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
 
-	# if reaction.message.id == last_video_message_sent.id:
-	# 	if '👎' in str(reaction):
-	# 		await reaction.message.channel.send('sorry, ik zal de volgende sturen ' + get_emoji('uh'))
-	# 		yt = bot.get_cog('Youtube')
-	# 		try:
-	# 			video_id = yt.last_search_result['result']['items'][1]['id']['videoId']
-	# 		except KeyError as e:
-	# 			next_page_token = yt.last_search_result['result']['nextPageToken']
-	# 			video_id = yt.search({**yt.yt.last_search_result['params'], 'nextPageToken': next_page_token})[0]
-	# 		await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
+	except KeyError as e:
+		pass
 
 @bot.event
 async def on_ready():
