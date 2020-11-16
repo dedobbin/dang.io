@@ -210,6 +210,6 @@ class Youtube(commands.Cog):
 	async def send_video(self, channel, item, search_result = None):
 		video_id = item['id']['videoId']
 		message = await channel.send('https://www.youtube.com/watch?v=' + video_id)
-		
+
 		if search_result:
 			self.video_messages[message.id] = search_result
