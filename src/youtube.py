@@ -1,5 +1,5 @@
 import sys, os, string, datetime
-from random import choice
+from random import choice, randrange
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -21,7 +21,7 @@ class SearchResult:
 		self.cursor = None
 
 	def random_item(self):
-		self.cursor = randrange(0, len(self.results['items']))
+		self.cursor = randrange(0, len(self.result['items']))
 		return self.result['items'][self.cursor]
 
 	def first_item(self):
@@ -118,9 +118,8 @@ class Youtube(commands.Cog):
 		}
 
 		result = self.search(search_params)
-		video_id = result.first_item()['id']['videoId']
-		message = await ctx.send("https://www.youtube.com/watch?v=" + video_id)
-		self.video_messages[message.id] = result
+		item = result.first_item()
+		await self.send_video(ctx.message.channel, item, result)
 
 	@commands.command(name='zoek', pass_context=True)
 	async def send_search_result(self, ctx, *params):
@@ -135,9 +134,8 @@ class Youtube(commands.Cog):
 		}
 
 		result = self.search(search_params)
-		video_id = result.first_item()['id']['videoId']
-		message = await ctx.send("https://www.youtube.com/watch?v=" + video_id)
-		self.video_messages[message.id] = result
+		item = result.first_item()
+		await self.send_video(ctx.message.channel, item, result)
 
 	@commands.command(name='random', pass_context=True)
 	async def send_random(self, ctx, param = None):
@@ -173,10 +171,8 @@ class Youtube(commands.Cog):
 			return
 
 		result = self.search(search_params)
-		video_id = result.random_item()['id']['videoId']
-		message = await ctx.send("https://www.youtube.com/watch?v=" + video_id)
-		self.video_messages[message.id] = result
-		
+		item = result.random_item()
+		await self.send_video(ctx, item, result)
 
 	@commands.Cog.listener()
 	async def on_reaction_add(self, reaction, user):
@@ -188,12 +184,16 @@ class Youtube(commands.Cog):
 			if '👎' in str(reaction):
 				associated_search_result = self.video_messages[reaction.message.id]
 				await reaction.message.channel.send('sorry, ik zal de volgende sturen')
-				#TODO: get next
 				next_video = associated_search_result.next_item()
-				video_id = next_video['id']['videoId']
-				message = await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
-				self.video_messages[message.id] = associated_search_result
-
+				await self.send_video(reaction.message.channel, next_video, associated_search_result)
 
 		except KeyError as e:
 			pass
+
+	#Pass search_result so can map sent message id to search_result, to use on reactions
+	async def send_video(self, channel, item, search_result = None):
+		video_id = item['id']['videoId']
+		message = await channel.send('https://www.youtube.com/watch?v=' + video_id)
+		
+		if search_result:
+			self.video_messages[message.id] = search_result
