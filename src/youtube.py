@@ -23,7 +23,6 @@ class SearchResult:
 	def first_item(self):
 		return self.result['items'][0]
 
-
 class Youtube(commands.Cog):
 	def __init__(self, bot, default_channel):
 		self.bot = bot
@@ -163,5 +162,6 @@ class Youtube(commands.Cog):
 
 		result = self.search(search_params)
 		video_id = result.random_item()['id']['videoId']
-		await ctx.send("https://www.youtube.com/watch?v=" + video_id)
+		message = await ctx.send("https://www.youtube.com/watch?v=" + video_id)
+		self.video_messages[message.id] = result
 		

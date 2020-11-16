@@ -90,12 +90,9 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-	global last_video_message_sent
-	
 	if(message.author.bot):
 		if 'www.youtube.com' in message.content:
-			last_video_message_sent = message
-			debug_print('last video message id: ' + str(message.id))
+			debug_print('sent video')
 		return
 
 	debug_print("message received: " + message.content)
