@@ -50,31 +50,6 @@ async def send_quote(ctx):
 #         await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
 
 @bot.event
-async def on_reaction_add(reaction, user):
-	#TODO: search history tied to sent message id
-	#TODO: place function in youtube module
-	#TODO: actually iterate instead of static 1
-	#TODO: test next
-	#TODO: instead of key error, check if there is another result
-	#TODO: test next page
-	#TODO: check if there is a next page
-	#TODO: when searched random, get a new random result instead of next???
-	#TODO: video_id_to_url
-	
-	yt = bot.get_cog("Youtube")
-	try:
-		if '👎' in str(reaction):
-			associated_search_result = yt.video_messages[reaction.message.id]
-			await reaction.message.channel.send('sorry, ik zal de volgende sturen ' + get_emoji('uh'))
-			#TODO: get next
-			next_video = associated_search_result.result['items'][1]
-			video_id = next_video['id']['videoId']
-			await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
-
-	except KeyError as e:
-		pass
-
-@bot.event
 async def on_ready():
 	global guild
 

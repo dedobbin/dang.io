@@ -125,7 +125,7 @@ class Youtube(commands.Cog):
 		}
 
 		result = self.search(search_params)
-		video_id = result.random_item()['id']['videoId']
+		video_id = result.first_item()['id']['videoId']
 		message = await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 		self.video_messages[message.id] = result
 
@@ -167,3 +167,22 @@ class Youtube(commands.Cog):
 		message = await ctx.send("https://www.youtube.com/watch?v=" + video_id)
 		self.video_messages[message.id] = result
 		
+
+	@commands.Cog.listener()
+	async def on_reaction_add(self, reaction, user):
+		#TODO: proper next function (including next page)
+		#TODO: video_id_to_url
+		#TODO: when searched random, get a new random result instead of next???
+		
+		#debug_print("got reaction: " + str(reaction))
+		try:
+			if '👎' in str(reaction):
+				associated_search_result = self.video_messages[reaction.message.id]
+				await reaction.message.channel.send('sorry, ik zal de volgende sturen')
+				#TODO: get next
+				next_video = associated_search_result.result['items'][1]
+				video_id = next_video['id']['videoId']
+				await reaction.message.channel.send('https://www.youtube.com/watch?v=' + video_id)
+
+		except KeyError as e:
+			pass
