@@ -78,7 +78,7 @@ async def on_message(message):
 			debug_print('sent video')
 		return
 
-	debug_print(message.author + " message received: " + message.content)
+	debug_print("message received: " + message.content)
 
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
