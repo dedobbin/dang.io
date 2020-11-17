@@ -201,6 +201,7 @@ class Youtube(commands.Cog):
 		try:
 			if '👎' in str(reaction):
 				associated_search_result = self.video_messages[reaction.message.id]
+				# TODO: if random video was searched, random random one instead of next
 				await reaction.message.channel.send('sorry, ik zal de volgende sturen')
 				next_video = associated_search_result.next_item()
 				if not next_video:
