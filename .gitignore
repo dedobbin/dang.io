@@ -1,5 +1,5 @@
-src/.env
-src/youtube_secrets.json
+.env
+youtube_secrets.json
 venv
-src/quotes.csv
+quotes.csv
 *.pyc
