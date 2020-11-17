@@ -34,20 +34,21 @@ class SearchResult:
 		self.cursor = 0
 		return self.result['items'][self.cursor]
 
-	def next_item(self, search_callback):
-		self.cursor += 1
+	# Returns none if no next exists, so can get next page
+	def next_item(self):		
 		try:
-			item = self.result['items'][self.cursor]
+			item = self.result['items'][self.cursor + 1]
+			self.cursor += 1
+			return item
 		except KeyError as e:
-			try:
-				self.params['pageToken'] = self.result['nextPageToken']
-				self.result = search_callback(self.params).result
-				item = self.first_item()
-			except KeyError as e:
-				raise DangError("de videos zijn op")
-			
+			debug_print('no next video in search result..')
+			return None
 
-		return item
+	def get_next_page(self, search_callback):
+		params = self.params
+		params['pageToken'] = self.result['nextPageToken']
+		result = search_callback(params)
+		return result
 
 class Youtube(commands.Cog):
 	def __init__(self, bot, default_channel):
@@ -201,7 +202,10 @@ class Youtube(commands.Cog):
 			if '👎' in str(reaction):
 				associated_search_result = self.video_messages[reaction.message.id]
 				await reaction.message.channel.send('sorry, ik zal de volgende sturen')
-				next_video = associated_search_result.next_item(self.search)
+				next_video = associated_search_result.next_item()
+				if not next_video:
+					associated_search_result = associated_search_result.get_next_page(self.search)
+					next_video = associated_search_result.first_item()
 				await self.send_video(reaction.message.channel, next_video, associated_search_result)
 
 		except KeyError as e:
@@ -217,4 +221,3 @@ class Youtube(commands.Cog):
 				# key 0 is lowest message ID, so oldest, remove that one..
 				del self.video_messages[list(self.video_messages.keys())[0]]
 			self.video_messages[message.id] = search_result
-			debug_print(len(self.video_messages))
