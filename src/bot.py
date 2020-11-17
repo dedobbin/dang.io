@@ -37,17 +37,24 @@ def get_emoji(name):
 	debug_print('couldn not find emoji ' + name)
 	return ''
 
+def magic_eight_ball():
+	return choice([
+		'hmmm', 
+		get_emoji('dangs_up2'),
+		get_emoji('uh'),
+	])
+
 @bot.command(name='mooi')
 async def send_quote(ctx):
     await ctx.send(get_random_quote())
 
-# @bot.event
-# async def on_command_error(ctx, error):
-#     if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-#         await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
-#     else:
-#         await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
-# 		# TODO: raise
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
+        await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
+    else:
+        await ctx.send('er is iets niet goed gegaan ' + get_emoji('cry'))
+		# TODO: raise
 
 @bot.event
 async def on_ready():
@@ -71,11 +78,11 @@ async def on_message(message):
 			debug_print('sent video')
 		return
 
-	debug_print("message received: " + message.content)
+	debug_print(message.author + " message received: " + message.content)
 
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
-		await message.channel.send(get_emoji('dangs_up2'))
+		await  message.channel.send(magic_eight_ball())
 
 	elif randrange(0, 60) == 5:
 		await message.channel.send(get_random_quote())
