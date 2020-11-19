@@ -10,7 +10,6 @@ from helpers import debug_print, env, get_text
 DISCORD_TOKEN = env('DISCORD_TOKEN')
 DISCORD_GUILD = env('DISCORD_GUILD')
 QUOTES_FILE = env('QUOTES_FILE')
-EMOJI_MAP_FILE = env('EMOJI_MAP')
 
 
 d,m,y = env('DEFAULT_CHANNEL_FIRST_UPLOAD_DATE').split('-')
@@ -20,9 +19,6 @@ default_channel = YoutubeChannel(env('DEFAULT_CHANNEL_ID'),first_upload_date)
 bot = commands.Bot(command_prefix='!')
 bot.add_cog(Youtube(bot, default_channel))
 guild = None
-
-# Used to translate ___EMOJI_CRY___ etc from string to guild emoji, mapping should be stored in EMOJI_MAP_FILE
-emoji_map = None
 
 def get_random_quote():
 	poetic_quotes = []
@@ -34,7 +30,6 @@ def get_random_quote():
 
 def get_emoji(name):
 	for emoji in guild.emojis:
-		#emojis[emoji.name] = str(emoji)
 		if emoji.name == name:
 			return str(emoji)
 	
@@ -44,23 +39,15 @@ def get_emoji(name):
 def magic_eight_ball():
 	return choice(get_text('magic_eight_ball'))
 
-# Replace ___EMOJI_CRY___ with proper emoji, based on emoji_map, fallback is regular emojis
-def parse_str_emoji(input):
-	global emoji_map
-	if not emoji_map:
-		with open(EMOJI_MAP_FILE) as f:
-			emoji_map = json.load(f)
+# Replace ___EMOJI_EMOJINAME___ with proper emoji, based on emoji_map
+def parse_str_emoji(teh_string):
 	
-	# ___EMOJI_.*___
-	p = re.compile(r"(.*)(___EMOJI_.*___)(.*)")
-	for e in re.findall(p, input):
-		print(e)
+	p = re.compile(r"___EMOJI_[a-zA-Z0-9_]*___")
+	for res in re.findall(p, teh_string):
+		emoji = res.strip("___").lstrip("EMOJI_")
+		teh_string = teh_string.replace(res, get_emoji(emoji))	
 		
-
-
-
-	return input
-
+	return teh_string
 
 @bot.command(name='mooi')
 async def send_quote(ctx):
@@ -89,6 +76,8 @@ async def on_ready():
 		f'{guild.name}(id: {guild.id})'
 	)
 
+	#debug_print(guild.emojis)
+
 @bot.event
 async def on_message(message):
 	if(message.author.bot):
@@ -100,12 +89,11 @@ async def on_message(message):
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
 		# test stuff
-		await message.channel.send(parse_str_emoji("___EMOJI_CRY___ er is iets ___EMOJI_CRY___ niet goed gegaan ___EMOJI_CRY___"))
-		#await message.channel.send(parse_str_emoji(magic_eight_ball()))
+		await message.channel.send(parse_str_emoji(magic_eight_ball()))
 
 	elif randrange(0, 60) == 5:
 		await message.channel.send(get_random_quote())
-		await message.channel.send(get_emoji('dangs_up2'))
+		await message.channel.send(get_text('happy'))
 
 	await bot.process_commands(message)
 
