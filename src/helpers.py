@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 dot_env_loaded = False
 texts = None
+env_path = None
 debug_bool = True
 
 def random_datetime_in_range(start, end):
@@ -11,10 +12,14 @@ def random_datetime_in_range(start, end):
     random_date = start + datetime.timedelta(days=randrange(n_days))
     return random_date
 
+def set_env_path(path):
+    global env_path
+    env_path = path
+
 def env(key):
-    global dot_env_loaded
+    global dot_env_loaded, env_path
     if not dot_env_loaded:
-        load_dotenv()
+        load_dotenv(dotenv_path=env_path)
         dot_env_loaded = True
     
     return os.getenv(key)

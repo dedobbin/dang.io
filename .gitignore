@@ -5,4 +5,4 @@ quotes.csv
 *.pyc
 texts.json
 emoji_map.json
-!example_config/*
+!config/example/*

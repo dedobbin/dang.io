@@ -1,11 +1,17 @@
-import os, json, sys, string, csv, datetime, re
+import os, json, sys, string, csv, datetime, re, argparse
 from random import choice, randrange
 import discord as discord_api
 from discord.ext import commands
 import inspect
 from youtube import Youtube, YoutubeChannel
 from dang_error import DangError
-from helpers import debug_print, env, get_text
+from helpers import debug_print, env, set_env_path, get_text
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--env_file', '-e', help="path to .env file containing guild and paths", type= str)
+args=parser.parse_args()
+
+set_env_path(args.env_file if args.env_file else None)
 
 DISCORD_TOKEN = env('DISCORD_TOKEN')
 DISCORD_GUILD = env('DISCORD_GUILD')
