@@ -55,11 +55,12 @@ async def send_quote(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-        await ctx.send(parse_str_emoji(str(error.original)) + ' ' + get_emoji('cry'))
-    else:
-       debug_print(error.original)
-		# TODO: raise
+	if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
+		await ctx.send(parse_str_emoji(str(error.original)) + ' ' + get_emoji('cry'))
+	else:
+		debug_print(error)
+		await ctx.send(parse_str_emoji(get_text("errors", "general")))
+		raise error
 
 @bot.event
 async def on_ready():
