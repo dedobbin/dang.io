@@ -36,6 +36,10 @@ def get_emoji(name):
 	debug_print('couldn not find emoji ' + name)
 	return ''
 
+def get_random_message_freq():
+	freq = env("RANDOM_MESSAGE_FREQ")
+	return freq if freq else 61
+
 def magic_eight_ball():
 	return choice(get_text('magic_eight_ball'))
 
@@ -92,7 +96,7 @@ async def on_message(message):
 		# test stuff
 		await message.channel.send(parse_str_emoji(magic_eight_ball()))
 
-	elif randrange(0, 60) == 5:
+	elif randrange(0, get_random_message_freq()) == 1:
 		await message.channel.send(parse_str_emoji(get_random_quote()))
 		await message.channel.send(parse_str_emoji(get_text('happy')))
 
