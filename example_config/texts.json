@@ -1,0 +1,12 @@
+{
+	"errors": {
+		"general" : "broke ___EMOJI_cry___"
+	},
+	"magic_eight_ball" : [
+		"yes",
+		"no",
+		"maybe"
+	],
+
+	"happy" : "yes ___EMOJI_happy___"
+}
