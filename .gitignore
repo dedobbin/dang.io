@@ -3,3 +3,5 @@ youtube_secrets.json
 venv
 quotes.csv
 *.pyc
+texts.json
+emoji_map.json
