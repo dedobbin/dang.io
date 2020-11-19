@@ -51,14 +51,14 @@ def parse_str_emoji(teh_string):
 
 @bot.command(name='mooi')
 async def send_quote(ctx):
-    await ctx.send(get_random_quote())
+    await ctx.send(parse_str_emoji(get_random_quote()))
 
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-        await ctx.send(str(error.original) + ' ' + get_emoji('cry'))
+        await ctx.send(parse_str_emoji(str(error.original)) + ' ' + get_emoji('cry'))
     else:
-        await ctx.send(get_text(error))
+       debug_print(error.original)
 		# TODO: raise
 
 @bot.event
@@ -92,8 +92,8 @@ async def on_message(message):
 		await message.channel.send(parse_str_emoji(magic_eight_ball()))
 
 	elif randrange(0, 60) == 5:
-		await message.channel.send(get_random_quote())
-		await message.channel.send(get_text('happy'))
+		await message.channel.send(parse_str_emoji(get_random_quote()))
+		await message.channel.send(parse_str_emoji(get_text('happy')))
 
 	await bot.process_commands(message)
 
