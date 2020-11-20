@@ -9,7 +9,7 @@ from helpers import debug_print, env
 
 DISCORD_TOKEN = env('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix='!', help_command=None)
 bot.add_cog(Youtube(bot))
 
 texts = {}
@@ -38,8 +38,6 @@ def get_text(*args, guild=None):
 		with open('config/' + str(guild.id) + '/texts.json') as f:
 			texts[guild.id] = json.load(f)
 			guild_texts = texts[guild.id]
-    
-	debug_print(texts[guild.id])
 
 	if len(args) == 0:
 		raise (ValueError("get_text called without params"))

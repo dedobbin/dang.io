@@ -136,7 +136,7 @@ class Youtube(commands.Cog):
 		return SearchResult(response, params)
 
 	
-	################# send functions #################
+	################# send commands #################
 
 	@commands.command(name='latest', pass_context=True)
 	async def send_latest_upload_url(self, ctx):
@@ -152,7 +152,7 @@ class Youtube(commands.Cog):
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
-	@commands.command(name='zoek', pass_context=True)
+	@commands.command(aliases=['search', 'zoek'], pass_context=True)
 	async def send_search_result(self, ctx, *params):
 		if len(params) == 0:
 			debug_print("search without params, aborting..")
@@ -168,7 +168,7 @@ class Youtube(commands.Cog):
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
-	@commands.command(name='random', pass_context=True)
+	@commands.command(aliases=['random', 'willekeurig'], pass_context=True)
 	async def send_random(self, ctx, param = None):
 		search_params = {
 			'maxResults': '50',
@@ -186,7 +186,7 @@ class Youtube(commands.Cog):
 			search_params['channelId'] = youtube_channel.id
 			search_params['publishedAfter'] = random_date
 		
-		elif param == 'echt':
+		elif param == 'echt' or param == 'real':
 			#get anything from youtube
 			random_date = random_datetime_in_range(
 				datetime.datetime(2005, 4, 1), 
