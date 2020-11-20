@@ -1,13 +1,15 @@
 import os, json, sys, string, csv, datetime, re
+from dotenv import load_dotenv
 from random import choice, randrange
 import discord as discord_api
 from discord.ext import commands
 import inspect
 from youtube import Youtube, YoutubeChannel
 from dang_error import DangError
-from helpers import debug_print, env
+from helpers import debug_print, config_file_path
 
-DISCORD_TOKEN = env('DISCORD_TOKEN')
+load_dotenv()
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!', help_command=None)
 bot.add_cog(Youtube(bot))
@@ -16,7 +18,7 @@ texts = {}
 
 def get_random_quote(guild):
 	poetic_quotes = []
-	with open('config/' + str(guild.id) + '/quotes.csv', newline='') as csvfile:
+	with open(config_file_path('quotes.csv', guild), newline='') as csvfile:
 		reader = csv.reader(csvfile, delimiter='|', quotechar='\\')
 		for row in reader:
 			poetic_quotes.append(row[0])
@@ -35,7 +37,7 @@ def get_text(*args, guild=None):
 	try:
 		guild_texts = texts[guild.id]
 	except KeyError as e:
-		with open('config/' + str(guild.id) + '/texts.json') as f:
+		with open(config_file_path('texts.json', guild)) as f:
 			texts[guild.id] = json.load(f)
 			guild_texts = texts[guild.id]
 
@@ -55,7 +57,7 @@ def get_text(*args, guild=None):
 	return result
 
 def get_random_message_freq():
-	freq = env("RANDOM_MESSAGE_FREQ")
+	freq = os.getenv("RANDOM_MESSAGE_FREQ")
 	return int(freq) if freq else 61
 
 def magic_eight_ball(guild):

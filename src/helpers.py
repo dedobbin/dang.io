@@ -1,27 +1,27 @@
 import datetime, os, json
 from random import randrange
-from dotenv import load_dotenv
+import os
 
-dot_env_loaded = False
-env_path = None
 debug_bool = True
+
+def config_file_path(file, guild = None):
+    default_file_path = 'config/default/' + file
+    specific_file_path = 'config/' + str(guild.id) + '/' + file if guild else None
+
+    if guild and os.path.isfile(specific_file_path):
+        return specific_file_path
+    
+    if guild and os.path.isfile(default_file_path):
+        print('No specific ' + file + ' config found for ' + guild.name + ', using default')
+        return default_file_path
+
+    raise RuntimeError('Config file ' + file + ' not found')
+
 
 def random_datetime_in_range(start, end):
     n_days = (end - start).days
     random_date = start + datetime.timedelta(days=randrange(n_days))
     return random_date
-
-def set_env_path(path):
-    global env_path
-    env_path = path
-
-def env(key):
-    global dot_env_loaded, env_path
-    if not dot_env_loaded:
-        load_dotenv(dotenv_path=env_path)
-        dot_env_loaded = True
-    
-    return os.getenv(key)
 
 def debug_print(input):
 	if debug_bool:

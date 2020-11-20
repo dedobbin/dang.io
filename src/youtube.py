@@ -4,7 +4,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from discord.ext import commands
-from helpers import debug_print, env, random_datetime_in_range
+from helpers import debug_print, random_datetime_in_range
 from dang_error import DangError
 
 class YoutubeChannel:
@@ -69,8 +69,8 @@ class Youtube(commands.Cog):
 
 		# YOUTUBE_SECRET_FILE should be file with JSON obtained from https://console.developers.google.com/apis/credentials, OAuth 2.0-client-ID's 
 		# YOUTUBE_API_KEY can also be obtained from there
-		YOUTUBE_API_KEY = env('YOUTUBE_API_KEY');
-		YOUTUBE_SECRET_FILE = env('YOUTUBE_SECRETS_FILE')
+		YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY');
+		YOUTUBE_SECRET_FILE = os.getenv('YOUTUBE_SECRETS_FILE')
 
 		if oauth:
 			scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
