@@ -35,6 +35,7 @@ def get_emoji(name, guild):
 	debug_print('couldn not find emoji ' + name)
 	return ''
 
+# If you expect array/dict back with alot of entries, while you want to pick only one, you can bypass emoji_parse stage 
 def get_text(*args, guild = None, emoji_parse = True):
 	global texts
 	try:
@@ -59,19 +60,8 @@ def get_text(*args, guild = None, emoji_parse = True):
 
 	if not guild or not parse_str_emoji:
 		return result
-
-	if isinstance(result, str):
+	else:
 		return parse_str_emoji(result, guild)
-	elif isinstance(result, dict):
-		parsed = {};
-		for key in result:
-			parsed[key] = parse_str_emoji(result[key], guild)
-		return parsed
-	elif isinstance(result, list):
-		parsed = [];
-		for r in result:
-			parsed.append(parse_str_emoji(r, guild))
-		return parsed
 
 def get_random_message_freq():
 	freq = os.getenv("RANDOM_MESSAGE_FREQ")
@@ -82,7 +72,18 @@ def magic_eight_ball(guild):
 
 # Replace ___EMOJI_EMOJINAME___ with proper emoji, based on emoji_map
 def parse_str_emoji(teh_string, guild):
-	
+	# If teh_string is secretly not a string
+	if isinstance(teh_string, dict):
+		parsed = {};
+		for key in teh_string:
+			parsed[key] = parse_str_emoji(teh_string[key], guild)
+		return parsed
+	elif isinstance(teh_string, list):
+		parsed = [];
+		for r in teh_string:
+			parsed.append(parse_str_emoji(r, guild))
+		return parsed
+
 	p = re.compile(r"___EMOJI_[a-zA-Z0-9_]*___")
 	for res in re.findall(p, teh_string):
 		emoji = res.strip("___").lstrip("EMOJI_")
