@@ -7,4 +7,4 @@ texts.json
 emoji_map.json
 config/*
 !config/example/*
- .vscode/
+.vscode
