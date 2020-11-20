@@ -1,4 +1,4 @@
-import sys, os, string, datetime
+import sys, os, string, datetime, json
 from random import choice, randrange
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -51,14 +51,17 @@ class SearchResult:
 		return result
 
 class Youtube(commands.Cog):
-	def __init__(self, bot, default_channel):
+	def __init__(self, bot):
 		self.bot = bot
-		self.default_channel  = default_channel
 		self.youtube_api = None
+		# Maps guild ID to a default youtube channel, defined in config/guild/youtube.json
+		self.__default_channels = {}
 
 		# maps search results to sent message ID after sending, so can look up when reaction on message comes in 
 		self.video_messages = {}
 		self.max_video_message_history = 10
+
+		self.youtube_auth()
 
 	def youtube_auth(self, oauth = False):
 		api_service_name = "youtube"
@@ -77,11 +80,20 @@ class Youtube(commands.Cog):
 		else:
 			self.youtube_api = googleapiclient.discovery.build(api_service_name, api_version, developerKey=YOUTUBE_API_KEY)
 	
+	def get_default_channel(self, guild):
+		try:
+			return self.__default_channels[guild.id]
+		except KeyError:
+			with open('config/' + str(guild.id) + '/youtube.json') as f:
+				data = json.load(f)['default_channel']
+				# TODO: get first upload date automagically
+				d, m, y = data['first_upload_date'].split('-')
+				first_upload_date = datetime.datetime(int(d), int(m), int(y))
+				self.__default_channels[guild.id] = YoutubeChannel(data['id'], first_upload_date)
+				return self.__default_channels[guild.id]
+
 	# Adds search result to history + returns index key of entry in history
 	def search(self, dynamic_params, all_pages = False):
-		if self.youtube_api == None:
-			self.youtube_auth()
-
 		static_params = {"part":"snippet"}
 
 		params = {**static_params, **dynamic_params}
@@ -128,8 +140,9 @@ class Youtube(commands.Cog):
 
 	@commands.command(name='latest', pass_context=True)
 	async def send_latest_upload_url(self, ctx):
+		youtube_channel = self.get_default_channel(ctx.guild) 
 		search_params = {
-			'channelId': self.default_channel.id,
+			'channelId': youtube_channel.id,
 			'maxResults': '25',
 			'order': 'date',
 			'type': 'video'
@@ -164,12 +177,13 @@ class Youtube(commands.Cog):
 		
 		if not param:
 			#get from channel
+			youtube_channel = self.get_default_channel(ctx.guild) 
 			random_date = random_datetime_in_range(
-				self.default_channel.first_upload_datetime, 
+				youtube_channel.first_upload_datetime, 
 				datetime.datetime.now()
 			).isoformat() + 'Z'
 
-			search_params['channelId'] = self.default_channel.id
+			search_params['channelId'] = youtube_channel.id
 			search_params['publishedAfter'] = random_date
 		
 		elif param == 'echt':
