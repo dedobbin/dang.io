@@ -22,9 +22,12 @@ def get_random_quote(guild):
 		reader = csv.reader(csvfile, delimiter='|', quotechar='\\')
 		for row in reader:
 			poetic_quotes.append(row[0])
-	return choice(poetic_quotes)
+	return parse_str_emoji(choice(poetic_quotes), guild)
 
 def get_emoji(name, guild):
+	if not guild:
+		debug_print("Requested emoji without guild..")
+		return ""
 	for emoji in guild.emojis:
 		if emoji.name == name:
 			return str(emoji)
@@ -32,14 +35,14 @@ def get_emoji(name, guild):
 	debug_print('couldn not find emoji ' + name)
 	return ''
 
-def get_text(*args, guild=None):
+def get_text(*args, guild = None, emoji_parse = True):
 	global texts
 	try:
-		guild_texts = texts[guild.id]
+		guild_texts = texts[guild.id ]
 	except KeyError as e:
 		with open(config_file_path('texts.json', guild)) as f:
-			texts[guild.id] = json.load(f)
-			guild_texts = texts[guild.id]
+			texts[guild.id ] = json.load(f)
+			guild_texts = texts[guild.id ]
 
 	if len(args) == 0:
 		raise (ValueError("get_text called without params"))
@@ -54,14 +57,28 @@ def get_text(*args, guild=None):
 		print("text not found, keys: " + str(args))
 		return ""
 
-	return result
+	if not guild or not parse_str_emoji:
+		return result
+
+	if isinstance(result, str):
+		return parse_str_emoji(result, guild)
+	elif isinstance(result, dict):
+		parsed = {};
+		for key in result:
+			parsed[key] = parse_str_emoji(result[key], guild)
+		return parsed
+	elif isinstance(result, list):
+		parsed = [];
+		for r in result:
+			parsed.append(parse_str_emoji(r, guild))
+		return parsed
 
 def get_random_message_freq():
 	freq = os.getenv("RANDOM_MESSAGE_FREQ")
 	return int(freq) if freq else 61
 
 def magic_eight_ball(guild):
-	return choice(get_text('magic_eight_ball', guild=guild))
+	return choice(get_text('magic_eight_ball', guild = guild))
 
 # Replace ___EMOJI_EMOJINAME___ with proper emoji, based on emoji_map
 def parse_str_emoji(teh_string, guild):
@@ -75,27 +92,29 @@ def parse_str_emoji(teh_string, guild):
 
 @bot.command(name='mooi')
 async def send_quote(ctx):
-    await ctx.send(parse_str_emoji(get_random_quote(ctx.guild), ctx.guild))
+    await ctx.send(get_random_quote(ctx.guild))
 
 @bot.event
 async def on_command_error(ctx, error):
 	if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
 		await ctx.send(parse_str_emoji(str(error.original), ctx.guild) + ' ' + get_emoji('cry', ctx.guild))
 	if isinstance(error, commands.CommandNotFound):
+		# Don't respond to unknown commands
 		debug_print(str(error))
 	else:
 		debug_print(error)
-		await ctx.send(parse_str_emoji(get_text("errors", "general", guild=ctx.guild), ctx.guild))
+		await ctx.send(get_text("errors", "general", guild=ctx.guild), ctx.guild)
 		raise error
 
 @bot.event
 async def on_ready():
-	
 	print('Went online in')
 	for g in bot.guilds:
 		print(g.name + '(' + str(g.id) + ')')
 
 	#debug_print(guild.emojis)
+	# Test stuff
+	debug_print(magic_eight_ball(bot.guilds[0]))
 
 @bot.event
 async def on_message(message):
@@ -107,12 +126,11 @@ async def on_message(message):
 	debug_print("message received: " + message.content)
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
-		# test stuff
-		await message.channel.send(parse_str_emoji(magic_eight_ball(message.guild), message.guild))
+		await message.channel.send(magic_eight_ball(message.guild))
 
 	elif randrange(0, get_random_message_freq()) == 1:
-		await message.channel.send(parse_str_emoji(get_random_quote(message.guild)))
-		await message.channel.send(parse_str_emoji(get_text('happy', message.guild)))
+		await message.channel.send(get_random_quote(message.guild))
+		await message.channel.send(get_text('happy', message.guild))
 
 	await bot.process_commands(message)
 
