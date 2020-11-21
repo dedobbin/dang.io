@@ -35,15 +35,16 @@ async def send_quote(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
+	#debug_print(error)
 	if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
+		debug_print("Dang error: " + str(error))
 		await ctx.send(parse_str_emoji(str(error.original), ctx.guild))
-	if isinstance(error, commands.CommandNotFound):
+	elif isinstance(error, commands.CommandNotFound):
 		# Don't respond to unknown commands
 		debug_print(str(error))
 	else:
-		debug_print(error)
-		await ctx.send(get_text("errors", "general", guild=ctx.guild))
-		raise error
+		debug_print("General error: " + str(error))
+		await ctx.send(get_text("errors", "general", guild = ctx.guild))
 
 @bot.event
 async def on_ready():
@@ -67,7 +68,6 @@ async def on_message(message):
 
 	elif randrange(0, get_random_message_freq()) == 1:
 		await message.channel.send(get_random_quote(message.guild))
-		await message.channel.send(get_text('happy', message.guild))
 
 	await bot.process_commands(message)
 
