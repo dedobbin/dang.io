@@ -7,17 +7,22 @@ texts = {}
 debug_bool = True
 
 def config_file_path(file, guild = None):
-    default_file_path = 'config/default/' + file
-    specific_file_path = 'config/' + str(guild.id) + '/' + file if guild else None
+	default_file_path = 'config/default/' + file
+	specific_file_path = 'config/' + str(guild.id) + '/' + file if guild else None
 
-    if guild and os.path.isfile(specific_file_path):
-        return specific_file_path
-    
-    if guild and os.path.isfile(default_file_path):
-        print('No specific ' + file + ' config found for ' + guild.name + ', using default')
-        return default_file_path
+	if guild and os.path.isfile(specific_file_path):
+		return specific_file_path
 
-    raise RuntimeError('Config file ' + file + ' not found')
+	if not os.path.isfile(default_file_path):
+		raise RuntimeError('Config file ' + file + ' not found')
+
+	if guild:
+		print('No specific ' + file + ' config found for ' + guild.name + ', using default')
+	else:
+		print('config_file_path called without guild, using default ' + file)
+
+	return default_file_path
+
 
 
 def random_datetime_in_range(start, end):
@@ -48,12 +53,15 @@ def get_emoji(name, guild):
 # If you expect array/dict back with alot of entries, while you want to pick only one, you can bypass emoji_parse stage 
 def get_text(*args, guild = None):
 	global texts
+
+	key = guild.id if guild else 'default' 
+
 	try:
-		guild_texts = texts[guild.id ]
+		guild_texts = texts[key]
 	except KeyError as e:
 		with open(config_file_path('texts.json', guild)) as f:
-			texts[guild.id ] = json.load(f)
-			guild_texts = texts[guild.id ]
+			texts[key] = json.load(f)
+			guild_texts = texts[key]
 
 	if len(args) == 0:
 		raise (ValueError("get_text called without params"))
