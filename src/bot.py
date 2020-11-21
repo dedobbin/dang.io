@@ -72,6 +72,10 @@ def magic_eight_ball(guild):
 
 # Replace ___EMOJI_EMOJINAME___ with proper emoji, based on emoji_map
 def parse_str_emoji(teh_string, guild):
+	if not guild:
+		debug_print("Tried to parse_str_emoji without guild..")
+		return teh_string
+	
 	# If teh_string is secretly not a string
 	if isinstance(teh_string, dict):
 		parsed = {};
@@ -84,6 +88,7 @@ def parse_str_emoji(teh_string, guild):
 			parsed.append(parse_str_emoji(r, guild))
 		return parsed
 
+	# actual string operations
 	p = re.compile(r"___EMOJI_[a-zA-Z0-9_]*___")
 	for res in re.findall(p, teh_string):
 		emoji = res.strip("___").lstrip("EMOJI_")
@@ -114,8 +119,6 @@ async def on_ready():
 		print(g.name + '(' + str(g.id) + ')')
 
 	#debug_print(guild.emojis)
-	# Test stuff
-	debug_print(magic_eight_ball(bot.guilds[0]))
 
 @bot.event
 async def on_message(message):
