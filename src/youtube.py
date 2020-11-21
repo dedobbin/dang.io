@@ -93,7 +93,7 @@ class Youtube(commands.Cog):
 				return self.__default_channels[guild.id]
 
 	# Adds search result to history + returns index key of entry in history
-	def search(self, dynamic_params, all_pages = False):
+	def search(self, dynamic_params, all_pages = False, guild = None):
 		static_params = {"part":"snippet"}
 
 		params = {**static_params, **dynamic_params}
@@ -123,7 +123,7 @@ class Youtube(commands.Cog):
 					pass
 		except googleapiclient.errors.HttpError as e:
 			debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
-			raise DangError('ik heb geen verbinding met youtube')
+			raise DangError(get_text('error youtube', guild = guild))
 
 		if all_pages and num_expected != len(items):
 			debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
@@ -131,7 +131,7 @@ class Youtube(commands.Cog):
 		#self.search_results.append({'result': response, 'params': params})
 		
 		if len(items) == 0:
-			raise DangError('ik kan niks vinden')
+			raise DangError(get_text('errors', 'no_videos', guild = guild))
 
 		return SearchResult(response, params)
 
@@ -148,7 +148,7 @@ class Youtube(commands.Cog):
 			'type': 'video'
 		}
 
-		result = self.search(search_params)
+		result = self.search(search_params, guild = ctx.guild)
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
@@ -164,7 +164,7 @@ class Youtube(commands.Cog):
 			'type': 'video'
 		}
 
-		result = self.search(search_params)
+		result = self.search(search_params, guild = ctx.guild)
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
@@ -202,7 +202,7 @@ class Youtube(commands.Cog):
 			debug_print("Unknown param for search: " + param)
 			return
 
-		result = self.search(search_params)
+		result = self.search(search_params, guild = ctx.guild)
 		item = result.random_item()
 		await self.send_video(ctx, item, result)
 

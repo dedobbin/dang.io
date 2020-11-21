@@ -61,7 +61,7 @@ def get_text(*args, guild = None):
 	result = ""
 	try:
 		result = guild_texts[args[0]]
-		
+
 		for i in range(1, len(args)):
 			result = result[args[i]]
 	except KeyError as e:

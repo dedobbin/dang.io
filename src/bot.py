@@ -36,13 +36,13 @@ async def send_quote(ctx):
 @bot.event
 async def on_command_error(ctx, error):
 	if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-		await ctx.send(parse_str_emoji(str(error.original), ctx.guild) + ' ' + get_emoji('cry', ctx.guild))
+		await ctx.send(parse_str_emoji(str(error.original), ctx.guild))
 	if isinstance(error, commands.CommandNotFound):
 		# Don't respond to unknown commands
 		debug_print(str(error))
 	else:
 		debug_print(error)
-		await ctx.send(get_text("errors", "general", guild=ctx.guild), ctx.guild)
+		await ctx.send(get_text("errors", "general", guild=ctx.guild))
 		raise error
 
 @bot.event
