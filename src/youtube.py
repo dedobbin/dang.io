@@ -123,7 +123,7 @@ class Youtube(commands.Cog):
 					pass
 		except googleapiclient.errors.HttpError as e:
 			debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
-			raise DangError(get_text('errors' 'youtube', guild = guild))
+			raise DangError(get_text('errors', 'youtube', guild = guild))
 
 		if all_pages and num_expected != len(items):
 			debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
