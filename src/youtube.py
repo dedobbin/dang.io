@@ -4,7 +4,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from discord.ext import commands
-from helpers import debug_print, random_datetime_in_range
+from helpers import debug_print, random_datetime_in_range, get_text
 from dang_error import DangError
 
 class YoutubeChannel:
@@ -216,7 +216,8 @@ class Youtube(commands.Cog):
 			if '👎' in str(reaction):
 				associated_search_result = self.video_messages[reaction.message.id]
 				# TODO: if random video was searched, random random one instead of next
-				await reaction.message.channel.send('sorry, ik zal de volgende sturen')
+
+				await reaction.message.channel.send(get_text("next_video", guild = reaction.message.guild))
 				next_video = associated_search_result.next_item()
 				if not next_video:
 					associated_search_result = associated_search_result.get_next_page(self.search)
