@@ -32,6 +32,7 @@ def should_send_random_message(guild = None):
 async def send_quote(ctx):
 	await ctx.send(get_random_quote(ctx.guild))
 
+# TODO: also handle errors in events
 @bot.event
 async def on_command_error(ctx, error):
 	#debug_print(error)
