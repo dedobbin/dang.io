@@ -1,29 +1,10 @@
-import datetime, os, json, re
+import datetime, os, json, re, os
 from random import randrange
 import os
 
 texts = {}
 
 debug_bool = True
-
-def config_file_path(file, guild = None):
-	default_file_path = 'config/default/' + file
-	specific_file_path = 'config/' + str(guild.id) + '/' + file if guild else None
-
-	if guild and os.path.isfile(specific_file_path):
-		return specific_file_path
-
-	if not os.path.isfile(default_file_path):
-		raise RuntimeError('Config file ' + file + ' not found')
-
-	if guild:
-		print('No specific ' + file + ' config found for ' + guild.name + ', using default')
-	else:
-		print('config_file_path called without guild, using default ' + file)
-
-	return default_file_path
-
-
 
 def random_datetime_in_range(start, end):
     n_days = (end - start).days
@@ -32,11 +13,7 @@ def random_datetime_in_range(start, end):
 
 def debug_print(input):
 	if debug_bool:
-		if (isinstance(input, str)):
-			print("<DEBUG> " + input)
-		else:
-			print("<DEBUG> ")
-			print(input)
+		print("<DEBUG> " + str(input))
 
 
 def get_emoji(name, guild):
@@ -50,8 +27,8 @@ def get_emoji(name, guild):
 	debug_print('couldn not find emoji ' + name)
 	return ''
 
-# If you expect array/dict back with alot of entries, while you want to pick only one, you can bypass emoji_parse stage 
 def get_text(*args, guild = None):
+	# TODO: now reads all strings into memory, maybe shouldn't..
 	global texts
 
 	key = guild.id if guild else 'default' 
@@ -59,8 +36,8 @@ def get_text(*args, guild = None):
 	try:
 		guild_texts = texts[key]
 	except KeyError as e:
-		with open(config_file_path('texts.json', guild)) as f:
-			texts[key] = json.load(f)
+			texts[key] = get_config("texts",config_folder = guild_to_config_path(guild))
+			texts[key] = parse_str_emoji(texts[key], guild)
 			guild_texts = texts[key]
 
 	if len(args) == 0:
@@ -74,10 +51,9 @@ def get_text(*args, guild = None):
 			result = result[args[i]]
 	except KeyError as e:
 		print("text not found, keys: " + str(args))
-		return ""
+		raise
 
-    #TODO: cache
-	return parse_str_emoji(result, guild)
+	return result
 
 # Replace ___EMOJI_EMOJINAME___ with proper emoji, based on emoji_map
 def parse_str_emoji(teh_string, guild):
@@ -104,3 +80,63 @@ def parse_str_emoji(teh_string, guild):
 		teh_string = teh_string.replace(res, get_emoji(emoji, guild))	
 		
 	return teh_string
+
+#TODO: cache config, now 2 IO calls are done in worst case, 1 in best
+def get_config(*keys, config_folder = "config/default", file="config.json"):
+	if not os.path.isfile(config_folder + "/" + file):
+		if config_folder != "config/default":
+			config_folder = "config/default"
+			if not os.path.isfile(config_folder + "/" + file):
+				raise RuntimeError("No config file or fallback found:" + config_folder + "/" + file)
+
+	possbile_folders = [config_folder, "config/default"] if not config_folder == "config/default" else ["config/default"]
+
+	for folder in possbile_folders:		
+		config = None
+		with open(folder + "/" + file) as f:
+			config = json.load(f)
+		try:
+			result = config[keys[0]]
+			for i in range(1, len(keys)):
+				result = result[keys[i]]
+			return result
+		except KeyError:
+			continue
+	
+	raise RuntimeError("No config found for " + str(keys))
+
+def guild_to_config_path(guild):
+	return "config/" + str(guild.id) + "/" if guild else "config/default/"
+
+# Test stuff
+if __name__ == "__main__":
+	from dotenv import load_dotenv
+	load_dotenv()
+
+	assert "guild_config" == get_config("test", config_folder = "config/" + os.getenv("TEST_GUILD_ID"))
+	
+	assert "default_config" == get_config("test", config_folder = "config/nonexistent")
+	
+	assert "default_config" == get_config("test")
+	
+	assert "fallback_value" == get_config("fallback_test", config_folder = "config/" + os.getenv("TEST_GUILD_ID"))
+	
+	try:
+		get_config("nonexistent", config_folder = "config/" + os.getenv("TEST_GUILD_ID"))
+	except RuntimeError as e:
+		assert "No config found for" in str(e)
+
+	get_config_return_value = None
+	try:
+		get_config_return_value = get_config("nonexistent", config_folder = "config/nonexistent")
+	except RuntimeError as e:
+		assert "No config found for" in str(e)
+	assert get_config_return_value == None
+
+	get_config_return_value = None
+	try:
+		get_config_return_value = get_config("nonexistent")
+	except RuntimeError as e:
+		assert "No config found for" in str(e)
+	assert get_config_return_value == None
+

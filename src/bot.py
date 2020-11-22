@@ -6,7 +6,7 @@ from discord.ext import commands
 import inspect
 from youtube import Youtube, YoutubeChannel
 from dang_error import DangError
-from helpers import debug_print, config_file_path, parse_str_emoji, get_text, get_emoji
+from helpers import debug_print, parse_str_emoji, get_text, get_emoji, get_config, guild_to_config_path
 
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
@@ -15,23 +15,22 @@ bot = commands.Bot(command_prefix='!', help_command=None)
 bot.add_cog(Youtube(bot))
 
 def get_random_quote(guild):
-	poetic_quotes = []
-	with open(config_file_path('quotes.csv', guild), newline='') as csvfile:
-		reader = csv.reader(csvfile, delimiter='|', quotechar='\\')
-		for row in reader:
-			poetic_quotes.append(row[0])
-	return parse_str_emoji(choice(poetic_quotes), guild)
-
-def get_random_message_freq():
-	freq = os.getenv("RANDOM_MESSAGE_FREQ")
-	return int(freq) if freq else 61
+	return choice(get_text("quotes", guild = guild))
 
 def magic_eight_ball(guild):
 	return choice(get_text('magic_eight_ball', guild = guild))
 
+def should_send_random_message(guild = None):
+	#TODO: cache freq
+	freq = get_config("spam_freq", config_folder = guild_to_config_path(guild))
+	if (freq <= 0):
+		return False
+	c = randrange(0, freq )
+	return c == 0
+
 @bot.command(name='mooi')
 async def send_quote(ctx):
-    await ctx.send(get_random_quote(ctx.guild))
+	await ctx.send(get_random_quote(ctx.guild))
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -66,7 +65,7 @@ async def on_message(message):
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
 		await message.channel.send(magic_eight_ball(message.guild))
 
-	elif randrange(0, get_random_message_freq()) == 1:
+	elif should_send_random_message(message.guild):
 		await message.channel.send(get_random_quote(message.guild))
 
 	await bot.process_commands(message)

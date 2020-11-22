@@ -6,5 +6,6 @@ quotes.csv
 texts.json
 emoji_map.json
 config/*
-!config/example/*
+!config/default
+!config/default/*
 .vscode

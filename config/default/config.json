@@ -1,0 +1,29 @@
+{
+	"youtube_default_channel":{
+		"id" : "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
+		"first_upload_date": "2010-10-2"
+	},
+	"spam_freq": 60,
+	"test" : "default_config",
+	"fallback_test" : "fallback_value",
+	"texts" : {
+		"errors": {
+			"general" : "i broke",
+			"youtube" : "connection with youtube broke",
+			"no_videos" : "nothing found"
+		},
+		"magic_eight_ball" : [
+			"yes",
+			"no",
+			"hmmm",
+			"vraagteken"
+		],
+		"happy" : "yay",
+		"next_video" : "i will send teh next video",
+		"quotes" : [
+			"But we are strong, each in our purpose, and we are all more strong together",
+			"The world seems full of good men, even if there are monsters in it",
+			"There are bad dreams for those who sleep unwisely"
+		]
+	}
+}

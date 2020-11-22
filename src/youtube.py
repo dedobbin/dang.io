@@ -4,7 +4,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from discord.ext import commands
-from helpers import debug_print, random_datetime_in_range, get_text
+from helpers import debug_print, random_datetime_in_range, get_text, get_config, guild_to_config_path
 from dang_error import DangError
 
 class YoutubeChannel:
@@ -84,8 +84,7 @@ class Youtube(commands.Cog):
 		try:
 			return self.__default_channels[guild.id]
 		except KeyError:
-			with open('config/' + str(guild.id) + '/youtube.json') as f:
-				data = json.load(f)['default_channel']
+				data = get_config("youtube_default_channel", config_folder = guild_to_config_path(guild))
 				# TODO: get first upload date automagically
 				d, m, y = data['first_upload_date'].split('-')
 				first_upload_date = datetime.datetime(int(d), int(m), int(y))
