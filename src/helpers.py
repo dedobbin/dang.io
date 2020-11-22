@@ -15,7 +15,6 @@ def debug_print(input):
 	if debug_bool:
 		print("<DEBUG> " + str(input))
 
-
 def get_emoji(name, guild):
 	if not guild:
 		debug_print("Requested emoji without guild..")
