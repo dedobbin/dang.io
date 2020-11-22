@@ -51,7 +51,6 @@ async def on_ready():
 	for g in bot.guilds:
 		print(g.name + '(' + str(g.id) + ')')
 
-	debug_print(bot.get_cog("Youtube").get_default_channel( bot.guilds[0]))
 	#debug_print(guild.emojis)
 
 @bot.event

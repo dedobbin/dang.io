@@ -85,9 +85,9 @@ class Youtube(commands.Cog):
 			return self.__default_channels[guild.id]
 		except KeyError:
 				data = get_config("youtube_default_channel", config_folder = guild_to_config_path(guild))
-				# TODO: get first upload date automagically
+				# TODO: get first upload date automagically, oh this seems not possible through youtube api
 				y, m, d = data['first_upload_date'].split('-')
-				
+
 				first_upload_date = datetime.datetime(int(y), int(m), int(d))
 				self.__default_channels[guild.id] = YoutubeChannel(data['id'], first_upload_date)
 				return self.__default_channels[guild.id]
