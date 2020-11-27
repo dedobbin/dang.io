@@ -12,7 +12,7 @@ def random_datetime_in_range(start, end):
     return random_date
 
 def debug_print(input):
-	if debug_bool:
+	if os.getenv("DEBUG_MODE"):
 		print("<DEBUG> " + str(input))
 
 def get_emoji(name, guild):

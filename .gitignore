@@ -9,3 +9,4 @@ config/*
 !config/default
 !config/default/*
 .vscode
+geckodriver.log

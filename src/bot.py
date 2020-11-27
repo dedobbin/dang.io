@@ -5,6 +5,7 @@ import discord as discord_api
 from discord.ext import commands
 import inspect
 from youtube import Youtube, YoutubeChannel
+from youtube_s import Youtube_S
 from dang_error import DangError
 from helpers import debug_print, parse_str_emoji, get_text, get_emoji, get_config, guild_to_config_path
 
@@ -13,6 +14,7 @@ DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!', help_command=None)
 bot.add_cog(Youtube(bot))
+bot.add_cog(Youtube_S(bot))
 
 def get_random_quote(guild):
 	return choice(get_text("quotes", guild = guild))
@@ -45,6 +47,7 @@ async def on_command_error(ctx, error):
 	else:
 		debug_print("General error: " + str(error))
 		await ctx.send(get_text("errors", "general", guild = ctx.guild))
+		raise error
 
 @bot.event
 async def on_ready():
@@ -61,7 +64,8 @@ async def on_message(message):
 			debug_print('sent video')
 		return
 
-	debug_print("message received: " + message.content)
+	#debug_print(message.author.id)
+	debug_print("message received, " + str(message.author) + ": " + message.content)
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
 		await message.channel.send(magic_eight_ball(message.guild))
