@@ -27,22 +27,27 @@ def get_emoji(name, guild):
 	return ''
 
 def get_text(*args, guild = None):
-	# TODO: now reads all strings into memory, maybe shouldn't..
+	# TODO: now reads all strings into memory, maybe shouldn't ?
 	global texts
+
+	if len(args) == 0:
+		raise (ValueError("get_text called without params"))
 
 	key = guild.id if guild else 'default' 
 
 	try:
 		guild_texts = texts[key]
 	except KeyError as e:
-			texts[key] = get_config("texts",config_folder = guild_to_config_path(guild))
+			guild_texts = texts[key] = get_config("texts",config_folder = guild_to_config_path(guild))
 			texts[key] = parse_str_emoji(texts[key], guild)
 			guild_texts = texts[key]
 
-	if len(args) == 0:
-		raise (ValueError("get_text called without params"))
+	# When not found in guild texts, check default file..	
+	if not args[0] in guild_texts:
+		guild_texts[args[0]] = get_config("texts")[args[0]]
 
 	result = ""
+	
 	try:
 		result = guild_texts[args[0]]
 
