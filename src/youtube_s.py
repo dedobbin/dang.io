@@ -86,8 +86,10 @@ class Youtube_S(commands.Cog):
 				inner_html = block.get_attribute('innerHTML')
 				if "view" in inner_html or "watching" in inner_html:
 					video["views"] = self.parse_views_html(inner_html)
+				if "Scheduled for" in inner_html:
+					video["views"] = 0
 
-			#debug_print(video)
+			debug_print(video)
 			videos.append(video)
 
 		if len(videos) == 0:
