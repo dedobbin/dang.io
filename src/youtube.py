@@ -136,7 +136,7 @@ class Youtube(commands.Cog):
 		return SearchResult(response, params)
 
 	
-	################# send commands #################
+	################# send-commands #################
 
 	@commands.command(name='latest', pass_context=True)
 	async def send_latest_upload_url(self, ctx):
@@ -176,17 +176,6 @@ class Youtube(commands.Cog):
 		}
 		
 		if not param:
-			#get from channel
-			youtube_channel = self.get_default_channel(ctx.guild) 
-			random_date = random_datetime_in_range(
-				youtube_channel.first_upload_datetime, 
-				datetime.datetime.now()
-			).isoformat() + 'Z'
-
-			search_params['channelId'] = youtube_channel.id
-			search_params['publishedAfter'] = random_date
-		
-		elif param == 'echt' or param == 'real':
 			#get anything from youtube
 			random_date = random_datetime_in_range(
 				datetime.datetime(2005, 4, 1), 
@@ -197,6 +186,17 @@ class Youtube(commands.Cog):
 
 			search_params['publishedAfter'] = random_date
 			search_params['q'] = random_string
+		
+		elif param == 'default':
+			#get from channel
+			youtube_channel = self.get_default_channel(ctx.guild) 
+			random_date = random_datetime_in_range(
+				youtube_channel.first_upload_datetime, 
+				datetime.datetime.now()
+			).isoformat() + 'Z'
+
+			search_params['channelId'] = youtube_channel.id
+			search_params['publishedAfter'] = random_date
 		
 		else:
 			debug_print("Unknown param for search: " + param)
