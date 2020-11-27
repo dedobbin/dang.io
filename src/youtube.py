@@ -138,8 +138,8 @@ class Youtube(commands.Cog):
 	
 	################# send-commands #################
 
-	@commands.command(name='latest', pass_context=True)
-	async def send_latest_upload_url(self, ctx):
+	@commands.command(name='latest', pass_context=True,  description="Sends latest upload from default channel.")
+	async def send_latest_upranload_url(self, ctx):
 		youtube_channel = self.get_default_channel(ctx.guild) 
 		search_params = {
 			'channelId': youtube_channel.id,
@@ -152,7 +152,7 @@ class Youtube(commands.Cog):
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
-	@commands.command(aliases=['search', 'zoek'], pass_context=True)
+	@commands.command(aliases=['search', 'zoek'], pass_context=True, description="Standard Youtube search. Param is search query.")
 	async def send_search_result(self, ctx, *params):
 		if len(params) == 0:
 			debug_print("search without params, aborting..")
@@ -168,7 +168,7 @@ class Youtube(commands.Cog):
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
-	@commands.command(aliases=['random', 'willekeurig'], pass_context=True)
+	@commands.command(aliases=['random', 'willekeurig'], pass_context=True,  description="Send a random video. Use param 'default' to get from default channel.")
 	async def send_random(self, ctx, param = None):
 		search_params = {
 			'maxResults': '50',

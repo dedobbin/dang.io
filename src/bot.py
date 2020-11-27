@@ -30,9 +30,19 @@ def should_send_random_message(guild = None):
 	c = randrange(0, freq )
 	return c == 0
 
-@bot.command(name='mooi')
+@bot.command(name='mooi',  description="An inspirational quote.")
 async def send_quote(ctx):
 	await ctx.send(get_random_quote(ctx.guild))
+
+@bot.command(name="help", description="Shows this message.")
+async def help(ctx):
+	helptext = "```"
+	for command in bot.commands:
+		description = "|".join(command.aliases) if len(command.aliases) else command.name
+		description += f": {command.description}"
+		helptext+=f"{description}\n"
+	helptext+="```"
+	await ctx.send(helptext)
 
 # TODO: also handle errors in events
 @bot.event
