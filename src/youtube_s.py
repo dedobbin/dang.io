@@ -56,11 +56,10 @@ class Youtube_S(commands.Cog):
 	
 		return res
 
-	def get_videos(self, params):
+	def get_videos(self, params, guild = None):
 		self.driver.get(self.create_url(params))
 		self.scroll_to_bottom()
 		
-
 		raw_items = self.driver.find_elements_by_css_selector("ytd-video-renderer")
 
 		videos = []
@@ -92,7 +91,7 @@ class Youtube_S(commands.Cog):
 			videos.append(video)
 
 		if len(videos) == 0:
-			raise DangError(get_text("errors", "no_videos"))
+			raise DangError(get_text("errors", "no_videos",  guild = guild))
 		
 		return videos
 
@@ -104,7 +103,7 @@ class Youtube_S(commands.Cog):
 		search_params = self.param_last_hour
 		search_params['search_query'] = ' '.join(params) if len(list (params)) > 0  else ''.join(choice(string.ascii_lowercase) for i in range(3))
 
-		items = self.get_videos(search_params)
+		items = self.get_videos(search_params, ctx.guild)
 
 		CUT_OFF_POINT = 100
 		low_views = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
