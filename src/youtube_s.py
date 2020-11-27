@@ -28,10 +28,8 @@ class Youtube_S(commands.Cog):
 		# pretty jank, but works usually 
 		# TODO: finetune for faster responses, don't need all results
 		body = self.driver.find_element_by_css_selector("body")
-		for j in range(0, 3):
-			for i in range (0, 10):
-				body.send_keys(Keys.PAGE_DOWN)
-			sleep(0.5)
+		for i in range (0, 100):
+			body.send_keys(Keys.PAGE_DOWN)
 		return
 
 	def create_url(self, params):
