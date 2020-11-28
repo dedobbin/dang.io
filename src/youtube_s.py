@@ -87,7 +87,6 @@ class Youtube_S(commands.Cog):
 				if "Scheduled for" in inner_html:
 					video["views"] = 0
 
-			debug_print(video)
 			videos.append(video)
 
 		if len(videos) == 0:
@@ -108,4 +107,4 @@ class Youtube_S(commands.Cog):
 		CUT_OFF_POINT = 100
 		low_views = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
 
-		await ctx.send(choice(low_views)["url"])		
+		await ctx.send(choice(low_views)["url"] if len(low_views) >0 else choice(items)['url'])		

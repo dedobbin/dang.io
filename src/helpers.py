@@ -85,7 +85,7 @@ def parse_str_emoji(teh_string, guild):
 		
 	return teh_string
 
-#TODO: cache config, now 2 IO calls are done in worst case, 1 in best
+#TODO: optimize, does quite some IO etc
 def get_config(*keys, config_folder = "config/default", file="config.json"):
 	if not os.path.isfile(config_folder + "/" + file):
 		if config_folder != "config/default":
