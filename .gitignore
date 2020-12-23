@@ -10,3 +10,4 @@ config/*
 !config/default/*
 .vscode
 geckodriver.log
+ghostdriver.log
