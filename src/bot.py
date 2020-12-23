@@ -10,6 +10,7 @@ from dang_error import DangError
 from helpers import debug_print, parse_str_emoji, get_text, get_emoji, get_config, guild_to_config_path
 
 load_dotenv()
+
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!', help_command=None)
