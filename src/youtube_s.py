@@ -20,7 +20,10 @@ class Youtube_S(commands.Cog):
 		options = Options()
 		if not os.getenv("DEBUG_MODE"):
 			options.headless = True
-		self.driver = webdriver.Firefox(options=options, executable_path = os.getenv("WEBDRIVER_PATH"))
+		try:
+			self.driver = webdriver.Firefox(options=options, executable_path = os.getenv("WEBDRIVER_PATH"))
+		except:
+			debug_print("couldn't start web driver")
 		self.bot = bot
 
 
