@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 # from bs4 import BeautifulSoup
 # import requests
 from time import sleep
@@ -17,11 +17,12 @@ class Youtube_S(commands.Cog):
 	param_last_hour = {"sp" : "EgQIARAB"}
 
 	def __init__(self, bot):
-		options = Options()
-		if not os.getenv("DEBUG_MODE"):
-			options.headless = True
+		option = webdriver.ChromeOptions()
+		option.add_argument("--headless")
+		option.add_argument('--disable-gpu')
+		option.add_argument('--no-sandbox')
 		try:
-			self.driver = webdriver.Firefox(options=options, executable_path = os.getenv("WEBDRIVER_PATH"))
+			self.driver = webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=option)
 		except:
 			debug_print("couldn't start web driver")
 		self.bot = bot
