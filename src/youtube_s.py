@@ -18,9 +18,9 @@ class Youtube_S(commands.Cog):
 
 	def __init__(self, bot):
 		option = webdriver.ChromeOptions()
-		option.add_argument("--headless")
-		option.add_argument('--disable-gpu')
-		option.add_argument('--no-sandbox')
+		if os.getenv("DEBUG_MODE"):
+			option.add_argument("--headless")
+			option.add_argument('--disable-gpu')
 		try:
 			self.driver = webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=option)
 		except Exception as e:
