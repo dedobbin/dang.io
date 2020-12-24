@@ -3,7 +3,7 @@
 		"id" : "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
 		"first_upload_date": "2010-10-2"
 	},
-	"spam_freq": 60,
+	"spam_freq": 500,
 	"test" : "default_config",
 	"fallback_test" : "fallback_value",
 	"texts" : {
