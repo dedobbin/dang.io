@@ -23,8 +23,8 @@ class Youtube_S(commands.Cog):
 		option.add_argument('--no-sandbox')
 		try:
 			self.driver = webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=option)
-		except:
-			debug_print("couldn't start web driver")
+		except Exception as e:
+			print("couldn't start web driver", e)
 		self.bot = bot
 
 
