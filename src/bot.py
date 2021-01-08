@@ -64,8 +64,9 @@ async def on_command_error(ctx, error):
 async def on_ready():
 	test_json_key = "texts_"+os.getenv("TEST_GUILD_ID")
 	print(test_json_key)
-	print(os.getenv(test_json_key))
-	
+	test_data=os.getenv(test_json_key)
+	print(json.load(test_data))
+
 
 	print('Went online in')
 	for g in bot.guilds:
