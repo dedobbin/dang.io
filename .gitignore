@@ -6,8 +6,7 @@ quotes.csv
 texts.json
 emoji_map.json
 config/*
-!config/default
-!config/default/*
+!config/default.json
 .vscode
 geckodriver.log
 ghostdriver.log

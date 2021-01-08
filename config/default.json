@@ -24,6 +24,10 @@
 			"But we are strong, each in our purpose, and we are all more strong together",
 			"The world seems full of good men, even if there are monsters in it",
 			"There are bad dreams for those who sleep unwisely"
-		]
+		],
+		"some_text" : "this is some text",
+		"some_test_text" : {
+			"some_inner_test" : "this should not display in tests"
+		}
 	}
 }

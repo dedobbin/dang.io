@@ -7,9 +7,10 @@ import inspect
 from youtube import Youtube, YoutubeChannel
 from youtube_s import Youtube_S
 from dang_error import DangError
-from helpers import debug_print, parse_str_emoji, get_text, get_emoji, get_config, guild_to_config_path
+from helpers import debug_print, parse_str_emoji, get_text, get_emoji, get_config, guild_to_config_path, config_files_to_env
 
 load_dotenv()
+config_files_to_env()
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -64,8 +65,6 @@ async def on_command_error(ctx, error):
 async def on_ready():
 	test_json_key = "config_"+os.getenv("TEST_GUILD_ID")
 	print(test_json_key)
-	test_data=os.getenv(test_json_key)
-	print(json.loads(test_data))
 
 
 	print('Went online in')

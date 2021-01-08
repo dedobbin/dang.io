@@ -2,7 +2,6 @@ import datetime, os, json, re, os
 from random import randrange
 import os
 
-texts = {}
 
 debug_bool = True
 
@@ -15,132 +14,80 @@ def debug_print(input):
 	if os.getenv("DEBUG_MODE"):
 		print("<DEBUG> " + str(input))
 
-def get_emoji(name, guild):
-	if not guild:
-		debug_print("Requested emoji without guild..")
-		return ""
-	for emoji in guild.emojis:
-		if emoji.name == name:
-			return str(emoji)
-	
-	debug_print('couldn not find emoji ' + name)
-	return ''
-
-def get_text(*args, guild = None):
-	# TODO: now reads all strings into memory, maybe shouldn't ?
-	global texts
-
-	if len(args) == 0:
-		raise (ValueError("get_text called without params"))
-
-	key = guild.id if guild else 'default' 
+def get_texts(guild_id, *keys):
+	texts = get_config(guild_id, "texts", keys[0])
+	if not texts:
+		texts = get_config("default", "texts", keys[0])
 
 	try:
-		guild_texts = texts[key]
-	except KeyError as e:
-			guild_texts = texts[key] = get_config("texts",config_folder = guild_to_config_path(guild))
-			texts[key] = parse_str_emoji(texts[key], guild)
-			guild_texts = texts[key]
+		for i in range(1, len(keys)):
+			texts = texts[keys[i]]
+	except:
+		texts = ""
 
-	# When not found in guild texts, check default file..	
-	if not args[0] in guild_texts:
-		guild_texts[args[0]] = get_config("texts")[args[0]]
+	return texts
 
-	result = ""
-	
+
+def get_config(guild_id, *keys):
+	env_key = "config_" + (guild_id if guild_id else "default")
 	try:
-		result = guild_texts[args[0]]
+		config = json.loads(os.getenv(env_key))
+	except:
+		config =  json.loads(os.getenv("config_default"))
 
-		for i in range(1, len(args)):
-			result = result[args[i]]
-	except KeyError as e:
-		print("text not found, keys: " + str(args))
-		raise
+	if not keys[0] in config:
+		config = json.loads(os.getenv("config_default"))
+		if not keys[0] in config:
+			print("unknown config")
+			return ""
 
-	return result
-
-# Replace ___EMOJI_EMOJINAME___ with proper emoji, based on emoji_map
-def parse_str_emoji(teh_string, guild):
-	if not guild:
-		debug_print("Tried to parse_str_emoji without guild..")
-		return teh_string
-	
-	# If teh_string is secretly not a string
-	if isinstance(teh_string, dict):
-		parsed = {};
-		for key in teh_string:
-			parsed[key] = parse_str_emoji(teh_string[key], guild)
-		return parsed
-	elif isinstance(teh_string, list):
-		parsed = [];
-		for r in teh_string:
-			parsed.append(parse_str_emoji(r, guild))
-		return parsed
-
-	# actual string operations
-	p = re.compile(r"___EMOJI_[a-zA-Z0-9_]*___")
-	for res in re.findall(p, teh_string):
-		emoji = res.strip("___").lstrip("EMOJI_")
-		teh_string = teh_string.replace(res, get_emoji(emoji, guild))	
-		
-	return teh_string
-
-#TODO: optimize, does quite some IO etc
-def get_config(*keys, config_folder = "config/default", file="config.json"):
-	if not os.path.isfile(config_folder + "/" + file):
-		if config_folder != "config/default":
-			config_folder = "config/default"
-			if not os.path.isfile(config_folder + "/" + file):
-				raise RuntimeError("No config file or fallback found:" + config_folder + "/" + file)
-
-	possbile_folders = [config_folder, "config/default"] if not config_folder == "config/default" else ["config/default"]
-
-	for folder in possbile_folders:		
-		config = None
-		with open(folder + "/" + file) as f:
-			config = json.load(f)
-		try:
-			result = config[keys[0]]
-			for i in range(1, len(keys)):
-				result = result[keys[i]]
-			return result
-		except KeyError:
-			continue
-	
-	raise RuntimeError("No config found for " + str(keys))
+	try:
+		for key in keys:
+			config = config[key]
+	except:
+		config = ""
+	return config
 
 def guild_to_config_path(guild):
-	return "config/" + str(guild.id) + "/" if guild else "config/default/"
+	return ""
+
+def config_files_to_env():
+	for file in os.listdir("config"):
+		with open("config/"+file) as f:
+			data = json.load(f)
+			os.environ["config_" + file.rstrip(".json")] = json.dumps(data)
+			# debug_print("Set env: " + "config_" + file.rstrip(".json"))
 
 # Test stuff
 if __name__ == "__main__":
 	from dotenv import load_dotenv
 	load_dotenv()
 
-	assert "guild_config" == get_config("test", config_folder = "config/" + os.getenv("TEST_GUILD_ID"))
+	config_files_to_env()
 	
-	assert "default_config" == get_config("test", config_folder = "config/nonexistent")
-	
-	assert "default_config" == get_config("test")
-	
-	assert "fallback_value" == get_config("fallback_test", config_folder = "config/" + os.getenv("TEST_GUILD_ID"))
-	
-	try:
-		get_config("nonexistent", config_folder = "config/" + os.getenv("TEST_GUILD_ID"))
-	except RuntimeError as e:
-		assert "No config found for" in str(e)
+	assert "" == get_config( os.getenv("TEST_GUILD_ID"), "nonexistant")
 
-	get_config_return_value = None
-	try:
-		get_config_return_value = get_config("nonexistent", config_folder = "config/nonexistent")
-	except RuntimeError as e:
-		assert "No config found for" in str(e)
-	assert get_config_return_value == None
+	assert "" == get_config(None, "nonexistant")
 
-	get_config_return_value = None
-	try:
-		get_config_return_value = get_config("nonexistent")
-	except RuntimeError as e:
-		assert "No config found for" in str(e)
-	assert get_config_return_value == None
+	assert "guild_config" == get_config(os.getenv("TEST_GUILD_ID"),"test")
+
+	data = get_config(os.getenv("TEST_GUILD_ID"),"nested_test", "layer_one")
+	assert (data["layer_two"] == "core")
+	
+	assert "core" == get_config(os.getenv("TEST_GUILD_ID"),"nested_test", "layer_one", "layer_two")
+
+	assert "" == get_config(os.getenv("TEST_GUILD_ID"),"nested_test", "layer_one", "layer_two", "nonexistant")
+
+	assert "default_config" == get_config(None, "test")
+
+	assert "default_config" == get_config("nonexistant", "test")
+
+	assert "fallback_value" == get_config(os.getenv("TEST_GUILD_ID"), "fallback_test")
+	
+	assert "niks" in get_texts(os.getenv("TEST_GUILD_ID"), "errors", "no_videos")
+
+	assert "this is some text" == get_texts(os.getenv("TEST_GUILD_ID"), "some_text")
+
+	assert "nothing found" == get_texts("nonexistant", "errors", "no_videos")
+
 
