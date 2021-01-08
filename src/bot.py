@@ -62,10 +62,10 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_ready():
-	test_json_key = "texts_"+os.getenv("TEST_GUILD_ID")
+	test_json_key = "config_"+os.getenv("TEST_GUILD_ID")
 	print(test_json_key)
 	test_data=os.getenv(test_json_key)
-	print(json.load(test_data))
+	print(json.loads(test_data))
 
 
 	print('Went online in')
