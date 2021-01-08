@@ -84,7 +84,7 @@ class Youtube(commands.Cog):
 		try:
 			return self.__default_channels[guild.id]
 		except KeyError:
-				data = get_config("youtube_default_channel", config_folder = guild_to_config_path(guild))
+				data = get_config(guild.id, "youtube_default_channel")
 				# TODO: get first upload date automagically, oh this seems not possible through youtube api
 				y, m, d = data['first_upload_date'].split('-')
 
@@ -217,7 +217,7 @@ class Youtube(commands.Cog):
 				associated_search_result = self.video_messages[reaction.message.id]
 				# TODO: if random video was searched, random random one instead of next
 
-				await reaction.message.channel.send(get_text("next_video", guild = reaction.message.guild))
+				await reaction.message.channel.send(get_text(reaction.message.guild.id, "next_video"))
 				next_video = associated_search_result.next_item()
 				if not next_video:
 					associated_search_result = associated_search_result.get_next_page(self.search)

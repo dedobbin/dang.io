@@ -14,7 +14,7 @@ def debug_print(input):
 	if os.getenv("DEBUG_MODE"):
 		print("<DEBUG> " + str(input))
 
-def get_texts(guild_id, *keys):
+def get_text(guild_id, *keys):
 	texts = get_config(guild_id, "texts", keys[0])
 	if not texts:
 		texts = get_config("default", "texts", keys[0])
@@ -29,7 +29,7 @@ def get_texts(guild_id, *keys):
 
 
 def get_config(guild_id, *keys):
-	env_key = "config_" + (guild_id if guild_id else "default")
+	env_key = "config_" + (str(guild_id) if guild_id else "default")
 	try:
 		config = json.loads(os.getenv(env_key))
 	except:
@@ -84,10 +84,10 @@ if __name__ == "__main__":
 
 	assert "fallback_value" == get_config(os.getenv("TEST_GUILD_ID"), "fallback_test")
 	
-	assert "niks" in get_texts(os.getenv("TEST_GUILD_ID"), "errors", "no_videos")
+	assert "niks" in get_text(os.getenv("TEST_GUILD_ID"), "errors", "no_videos")
 
-	assert "this is some text" == get_texts(os.getenv("TEST_GUILD_ID"), "some_text")
+	assert "this is some text" == get_text(os.getenv("TEST_GUILD_ID"), "some_text")
 
-	assert "nothing found" == get_texts("nonexistant", "errors", "no_videos")
+	assert "nothing found" == get_text("nonexistant", "errors", "no_videos")
 
 
