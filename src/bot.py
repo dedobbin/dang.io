@@ -51,7 +51,7 @@ async def on_command_error(ctx, error):
 	#debug_print(error)
 	if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
 		debug_print("Dang error: " + str(error))
-		await ctx.send(str(error.original, ctx.guild))
+		await ctx.send(str(error.original))
 	elif isinstance(error, commands.CommandNotFound):
 		# Don't respond to unknown commands
 		debug_print(str(error))

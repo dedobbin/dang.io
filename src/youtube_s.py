@@ -94,7 +94,7 @@ class Youtube_S(commands.Cog):
 			videos.append(video)
 
 		if len(videos) == 0:
-			raise DangError(get_text("errors", "no_videos",  guild = guild))
+			raise DangError(get_text(guild.id, "errors", "no_videos"))
 		
 		return videos
 
