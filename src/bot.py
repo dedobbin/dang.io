@@ -66,9 +66,6 @@ async def on_ready():
 	for g in bot.guilds:
 		print(g.name + '(' + str(g.id) + ')')
 
-	for emoji in g.emojis:
-		print(str(emoji))
-
 @bot.event
 async def on_message(message):
 	if(message.author.bot):
