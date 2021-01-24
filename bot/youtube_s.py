@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 # from bs4 import BeautifulSoup
 # import requests
-from time import sleep
+from time import sleep, time
 from discord.ext import commands
 import string, os
 from helpers import debug_print, get_text
@@ -15,10 +15,11 @@ from random import choice
 
 class Youtube_S(commands.Cog):
 	param_last_hour = {"sp" : "EgQIARAB"}
+	fast_mode = os.getenv("YOUTUBE_S_FAST_MODE")
 
 	def __init__(self, bot):
 		option = webdriver.ChromeOptions()
-		if os.getenv("DEBUG_MODE"):
+		if not os.getenv("DEBUG_MODE"):
 			option.add_argument("--headless")
 			option.add_argument('--disable-gpu')
 		try:
@@ -26,6 +27,11 @@ class Youtube_S(commands.Cog):
 		except Exception as e:
 			print("couldn't start web driver", e)
 		self.bot = bot
+
+		if self.fast_mode:
+			debug_print("Started youtube_s using fast mode")
+		else:
+			debug_print("Started youtube_s without fast mode")
 
 
 	def scroll_to_bottom(self):
@@ -60,7 +66,8 @@ class Youtube_S(commands.Cog):
 
 	def get_videos(self, params, guild = None):
 		self.driver.get(self.create_url(params))
-		self.scroll_to_bottom()
+		if not self.fast_mode:
+			self.scroll_to_bottom()
 		
 		raw_items = self.driver.find_elements_by_css_selector("ytd-video-renderer")
 
@@ -92,6 +99,8 @@ class Youtube_S(commands.Cog):
 					video["views"] = 0
 
 			videos.append(video)
+			if self.fast_mode:
+				break
 
 		if len(videos) == 0:
 			raise DangError(get_text(guild.id, "errors", "no_videos"))
@@ -103,6 +112,7 @@ class Youtube_S(commands.Cog):
 
 	@commands.command(aliases=['obscure', 'obscuur'], pass_context=True,  description="Sends a random obscure video. Param is search query (optional).")
 	async def s_latest(self, ctx, *params):
+		start_time = time()
 		search_params = self.param_last_hour
 		search_params['search_query'] = ' '.join(params) if len(list (params)) > 0  else ''.join(choice(string.ascii_lowercase) for i in range(3))
 
@@ -110,5 +120,7 @@ class Youtube_S(commands.Cog):
 
 		CUT_OFF_POINT = 100
 		low_views = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
+
+		debug_print("youtube_s took %s seconds" % (time() - start_time))
 
 		await ctx.send(choice(low_views)["url"] if len(low_views) >0 else choice(items)['url'])		

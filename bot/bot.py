@@ -73,8 +73,7 @@ async def on_message(message):
 			debug_print('sent video')
 		return
 
-	#debug_print(message.author.id)
-	debug_print("message received, " + str(message.author) + ": " + message.content)
+	#debug_print("message received, " + str(message.author) + ": " + message.content)
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
 		await message.channel.send(magic_eight_ball(message.guild))
