@@ -10,8 +10,12 @@ from dang_error import DangError
 from helpers import get_text, get_config, config_files_to_env
 import logging
 
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
+
 load_dotenv()
 config_files_to_env()
+
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -50,7 +54,7 @@ async def help(ctx):
 @bot.event
 async def on_command_error(ctx, error):
 	if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-		logging.error("Dang error: " + str(error))
+		#logging.error("Dang error: " + str(error))
 		await ctx.send(str(error.original))
 	elif isinstance(error, commands.CommandNotFound):
 		logging.error(str(error) + " (" + ctx.guild.name + ")")

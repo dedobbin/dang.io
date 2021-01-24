@@ -108,12 +108,17 @@ class Youtube_S(commands.Cog):
 
 	@commands.command(aliases=['obscure', 'obscuur'], pass_context=True,  description="Sends a random obscure video. Param is search query (optional).")
 	async def s_latest(self, ctx, *params):
+		start_time = time()
 		search_params = self.param_last_hour
 		search_params['search_query'] = ' '.join(params) if len(list (params)) > 0  else ''.join(choice(string.ascii_lowercase) for i in range(3))
 
 		items = self.get_videos(search_params, ctx.guild)
 
-		CUT_OFF_POINT = 100
-		low_views = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
+		low_views = []
+		if not self.fast_mode:
+			CUT_OFF_POINT = 100
+			low_views = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
+		
+		logging.info("Youtube_s took %s seconds" % (time() - start_time))
 
-		await ctx.send(choice(low_views)["url"] if len(low_views) >0 else choice(items)['url'])		
+		await ctx.send(choice(low_views)["url"] if len(low_views) > 0 else choice(items)['url'])		
