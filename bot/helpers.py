@@ -24,16 +24,17 @@ def get_text(guild_id, *keys):
 	return texts
 
 def get_error_text(guild_id, name):
-	text = get_config(guild_id, "errors_texts", name)
+	text = get_config(guild_id, "error_texts", name)
+	if not text:
+		text = get_config("default", "error_texts", name)
 	return text
-
 
 def get_config(guild_id, *keys):
 	env_key = "config_" + (str(guild_id) if guild_id else "default")
 	try:
 		config = json.loads(os.getenv(env_key))
 	except:
-		config =  json.loads(os.getenv("config_default"))
+		config = json.loads(os.getenv("config_default"))
 
 	if not keys[0] in config:
 		config = json.loads(os.getenv("config_default"))

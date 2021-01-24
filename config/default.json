@@ -25,12 +25,10 @@
 			"some_inner_test" : "this should not display in tests"
 		}
 	},
-	"errors_texts": {
+	"error_texts": {
 		"general" : "i broke",
 		"youtube" : "connection with youtube broke",
 		"no_videos" : "nothing found",
 		"unknown_command" : "unknown command, use `dang! help` for list of valid commands"
 	}
-
-
 }
