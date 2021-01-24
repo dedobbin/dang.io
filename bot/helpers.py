@@ -23,6 +23,10 @@ def get_text(guild_id, *keys):
 
 	return texts
 
+def get_error_text(guild_id, name):
+	text = get_config(guild_id, "errors_texts", name)
+	return text
+
 
 def get_config(guild_id, *keys):
 	env_key = "config_" + (str(guild_id) if guild_id else "default")
@@ -79,10 +83,10 @@ if __name__ == "__main__":
 
 	assert "fallback_value" == get_config(os.getenv("TEST_GUILD_ID"), "fallback_test")
 	
-	assert "niks" in get_text(os.getenv("TEST_GUILD_ID"), "errors", "no_videos")
+	assert "niks" in get_error_text(os.getenv("TEST_GUILD_ID"), "no_videos")
 
 	assert "this is some text" == get_text(os.getenv("TEST_GUILD_ID"), "some_text")
 
-	assert "nothing found" == get_text("nonexistant", "errors", "no_videos")
+	assert "nothing found" == get_error_text("nonexistant", "no_videos")
 
 

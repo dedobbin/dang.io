@@ -7,7 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep, time
 from discord.ext import commands
 import string, os
-from helpers import get_text
+from helpers import get_text, get_error_text
 from dang_error import DangError
 from random import choice
 import logging
@@ -99,7 +99,7 @@ class Youtube_S(commands.Cog):
 				break
 
 		if len(videos) == 0:
-			raise DangError(get_text(guild.id, "errors", "no_videos"))
+			raise DangError(get_error_text(guild.id, "no_videos"))
 		
 		return videos
 

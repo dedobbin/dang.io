@@ -7,7 +7,7 @@ import inspect
 from youtube import Youtube, YoutubeChannel
 from youtube_s import Youtube_S
 from dang_error import DangError
-from helpers import get_text, get_config, config_files_to_env
+from helpers import get_text, get_error_text, get_config, config_files_to_env
 import logging
 
 logging.basicConfig()
@@ -19,7 +19,7 @@ config_files_to_env()
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='dang!', help_command=None)
+bot = commands.Bot(command_prefix=['dang! ', '!dang ', 'dang!'], help_command=None)
 bot.add_cog(Youtube(bot))
 bot.add_cog(Youtube_S(bot))
 
@@ -58,8 +58,9 @@ async def on_command_error(ctx, error):
 		await ctx.send(str(error.original))
 	elif isinstance(error, commands.CommandNotFound):
 		logging.error(str(error) + " (" + ctx.guild.name + ")")
+		await ctx.send(get_error_text(ctx.guild.id, "unknown_command"))
 	else:
-		await ctx.send(get_text(ctx.guild.id, "errors", "general"))
+		await ctx.send(get_error_text(ctx.guild.id, "general"))
 		raise error
 
 @bot.event
