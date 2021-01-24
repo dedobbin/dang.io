@@ -19,7 +19,7 @@ config_files_to_env()
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-bot = commands.Bot(command_prefix='!', help_command=None)
+bot = commands.Bot(command_prefix='dang!', help_command=None)
 bot.add_cog(Youtube(bot))
 bot.add_cog(Youtube_S(bot))
 
