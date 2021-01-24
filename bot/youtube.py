@@ -4,8 +4,9 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from discord.ext import commands
-from helpers import debug_print, random_datetime_in_range, get_text, get_config, guild_to_config_path
+from helpers import random_datetime_in_range, get_text, get_config, guild_to_config_path
 from dang_error import DangError
+import logging
 
 class YoutubeChannel:
 	def __init__(self, id, first_upload_datetime = datetime.datetime(2005, 4, 1)):
@@ -41,7 +42,7 @@ class SearchResult:
 			self.cursor += 1
 			return item
 		except KeyError as e:
-			debug_print('no next video in search result..')
+			logging.warning('no next video in search result..')
 			return None
 
 	def get_next_page(self, search_callback):
@@ -60,8 +61,10 @@ class Youtube(commands.Cog):
 		# maps search results to sent message ID after sending, so can look up when reaction on message comes in 
 		self.video_messages = {}
 		self.max_video_message_history = 10
-
-		self.youtube_auth()
+		try:
+			self.youtube_auth()
+		except Exception as e:
+			logging.error("Failed to connect to youtube " + str(e))
 
 	def youtube_auth(self, oauth = False):
 		api_service_name = "youtube"
@@ -122,11 +125,11 @@ class Youtube(commands.Cog):
 				except KeyError as e:
 					pass
 		except googleapiclient.errors.HttpError as e:
-			debug_print("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
+			logging.error("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
 			raise DangError(get_text('errors', 'youtube', guild = guild))
 
 		if all_pages and num_expected != len(items):
-			debug_print("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
+			logging.warning("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
 
 		#self.search_results.append({'result': response, 'params': params})
 
@@ -139,7 +142,7 @@ class Youtube(commands.Cog):
 	################# send-commands #################
 
 	@commands.command(name='latest', pass_context=True,  description="Sends latest upload from default channel.")
-	async def send_latest_upranload_url(self, ctx):
+	async def send_latest_upload_url(self, ctx):
 		youtube_channel = self.get_default_channel(ctx.guild) 
 		search_params = {
 			'channelId': youtube_channel.id,
@@ -155,7 +158,7 @@ class Youtube(commands.Cog):
 	@commands.command(aliases=['search', 'zoek'], pass_context=True, description="Standard Youtube search. Param is search query.")
 	async def send_search_result(self, ctx, *params):
 		if len(params) == 0:
-			debug_print("search without params, aborting..")
+			logging.warning("search without params, aborting.." + "(" + ctx.guild.name + ")")
 			return
 
 		search_params = {
@@ -199,7 +202,7 @@ class Youtube(commands.Cog):
 			search_params['publishedAfter'] = random_date
 		
 		else:
-			debug_print("Unknown param for search: " + param)
+			logging.error("Unknown param for search: " + param)
 			return
 
 		result = self.search(search_params, guild = ctx.guild)
@@ -210,8 +213,6 @@ class Youtube(commands.Cog):
 	async def on_reaction_add(self, reaction, user):
 		#TODO: video_id_to_url
 		#TODO: when searched random, get a new random result instead of next???
-		
-		#debug_print("got reaction: " + str(reaction))
 		try:
 			if '👎' in str(reaction):
 				associated_search_result = self.video_messages[reaction.message.id]

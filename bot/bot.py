@@ -7,7 +7,8 @@ import inspect
 from youtube import Youtube, YoutubeChannel
 from youtube_s import Youtube_S
 from dang_error import DangError
-from helpers import debug_print, get_text, get_config, config_files_to_env
+from helpers import get_text, get_config, config_files_to_env
+import logging
 
 load_dotenv()
 config_files_to_env()
@@ -48,15 +49,12 @@ async def help(ctx):
 # TODO: also handle errors in events
 @bot.event
 async def on_command_error(ctx, error):
-	#debug_print(error)
 	if isinstance(error, commands.CommandInvokeError) and isinstance(error.original, DangError):
-		debug_print("Dang error: " + str(error))
+		logging.error("Dang error: " + str(error))
 		await ctx.send(str(error.original))
 	elif isinstance(error, commands.CommandNotFound):
-		# Don't respond to unknown commands
-		debug_print(str(error))
+		logging.error(str(error) + " (" + ctx.guild.name + ")")
 	else:
-		debug_print("General error: " + str(error))
 		await ctx.send(get_text(ctx.guild.id, "errors", "general"))
 		raise error
 
@@ -69,11 +67,11 @@ async def on_ready():
 @bot.event
 async def on_message(message):
 	if(message.author.bot):
-		if 'www.youtube.com' in message.content:
-			debug_print('sent video')
+		# if 'www.youtube.com' in message.content:
+		# 	logging.info('sent video')
 		return
 
-	#debug_print("message received, " + str(message.author) + ": " + message.content)
+	#logger.info("message received, " + str(message.author) + ": " + message.content)
 
 	if ('<@!%s>' % bot.user.id) in message.content or ('<@%s>' % bot.user.id) in message.content:
 		await message.channel.send(magic_eight_ball(message.guild))

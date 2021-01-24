@@ -7,9 +7,10 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep, time
 from discord.ext import commands
 import string, os
-from helpers import debug_print, get_text
+from helpers import get_text
 from dang_error import DangError
 from random import choice
+import logging
 
 ########### youtube doesn't like bots, and they increase view count, which is against TOS, so use at own risk
 
@@ -25,13 +26,8 @@ class Youtube_S(commands.Cog):
 		try:
 			self.driver = webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=option)
 		except Exception as e:
-			print("couldn't start web driver", e)
+			logging.error("couldn't start web driver:" +  str(e))
 		self.bot = bot
-
-		if self.fast_mode:
-			debug_print("Started youtube_s using fast mode")
-		else:
-			debug_print("Started youtube_s without fast mode")
 
 
 	def scroll_to_bottom(self):
@@ -112,7 +108,6 @@ class Youtube_S(commands.Cog):
 
 	@commands.command(aliases=['obscure', 'obscuur'], pass_context=True,  description="Sends a random obscure video. Param is search query (optional).")
 	async def s_latest(self, ctx, *params):
-		start_time = time()
 		search_params = self.param_last_hour
 		search_params['search_query'] = ' '.join(params) if len(list (params)) > 0  else ''.join(choice(string.ascii_lowercase) for i in range(3))
 
@@ -120,7 +115,5 @@ class Youtube_S(commands.Cog):
 
 		CUT_OFF_POINT = 100
 		low_views = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
-
-		debug_print("youtube_s took %s seconds" % (time() - start_time))
 
 		await ctx.send(choice(low_views)["url"] if len(low_views) >0 else choice(items)['url'])		

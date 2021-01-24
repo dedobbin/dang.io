@@ -10,10 +10,6 @@ def random_datetime_in_range(start, end):
     random_date = start + datetime.timedelta(days=randrange(n_days))
     return random_date
 
-def debug_print(input):
-	if os.getenv("DEBUG_MODE"):
-		print("<DEBUG> " + str(input))
-
 def get_text(guild_id, *keys):
 	texts = get_config(guild_id, "texts", keys[0])
 	if not texts:
@@ -56,7 +52,6 @@ def config_files_to_env():
 		with open("config/"+file) as f:
 			data = json.load(f)
 			os.environ["config_" + file.rstrip(".json")] = json.dumps(data)
-			# debug_print("Set env: " + "config_" + file.rstrip(".json"))
 
 # Test stuff
 if __name__ == "__main__":
