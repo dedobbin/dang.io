@@ -39,7 +39,6 @@ def get_config(guild_id, *keys):
 	if not keys[0] in config:
 		config = json.loads(os.getenv("config_default"))
 		if not keys[0] in config:
-			print("unknown config")
 			return ""
 
 	try:

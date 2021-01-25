@@ -88,6 +88,8 @@ class Youtube(commands.Cog):
 			return self.__default_channels[guild.id]
 		except KeyError:
 				data = get_config(guild.id, "youtube_default_channel")
+				if not data:
+					return None
 				# TODO: get first upload date automagically, oh this seems not possible through youtube api
 				y, m, d = data['first_upload_date'].split('-')
 
