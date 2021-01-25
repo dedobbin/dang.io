@@ -172,7 +172,7 @@ class Youtube(commands.Cog):
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
-	@commands.command(aliases=['random', 'willekeurig'], pass_context=True,  description="Send a random video. Use param 'default' to get from default channel.")
+	@commands.command(aliases=['random', 'willekeurig'], pass_context=True,  description="Send a random video.")
 	async def send_random(self, ctx, param = None):
 		search_params = {
 			'maxResults': '50',
@@ -191,7 +191,7 @@ class Youtube(commands.Cog):
 			search_params['publishedAfter'] = random_date
 			search_params['q'] = random_string
 		
-		elif param == 'default':
+		elif param == 'default' and self.get_default_channel(ctx.guild):
 			#get from channel
 			youtube_channel = self.get_default_channel(ctx.guild) 
 			random_date = random_datetime_in_range(
