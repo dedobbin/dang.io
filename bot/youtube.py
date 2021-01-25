@@ -55,8 +55,6 @@ class Youtube(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.youtube_api = None
-		# Maps guild ID to a default youtube channel, defined in config/guild/youtube.json
-		self.__default_channels = {}
 
 		# maps search results to sent message ID after sending, so can look up when reaction on message comes in 
 		self.video_messages = {}
@@ -84,18 +82,14 @@ class Youtube(commands.Cog):
 			self.youtube_api = googleapiclient.discovery.build(api_service_name, api_version, developerKey=YOUTUBE_API_KEY)
 	
 	def get_default_channel(self, guild):
-		try:
-			return self.__default_channels[guild.id]
-		except KeyError:
-				data = get_config(guild.id, "youtube_default_channel")
-				if not data:
-					return None
-				# TODO: get first upload date automagically, oh this seems not possible through youtube api
-				y, m, d = data['first_upload_date'].split('-')
+		data = get_config(guild.id, "youtube_default_channel")
+		if not data:
+			return None
+		# TODO: get first upload date automagically, oh this seems not possible through youtube api
+		y, m, d = data['first_upload_date'].split('-')
 
-				first_upload_date = datetime.datetime(int(y), int(m), int(d))
-				self.__default_channels[guild.id] = YoutubeChannel(data['id'], first_upload_date)
-				return self.__default_channels[guild.id]
+		first_upload_date = datetime.datetime(int(y), int(m), int(d))
+		return YoutubeChannel(data['id'], first_upload_date)
 
 	# Adds search result to history + returns index key of entry in history
 	def search(self, dynamic_params, all_pages = False, guild = None):
@@ -146,6 +140,11 @@ class Youtube(commands.Cog):
 	@commands.command(name='latest', pass_context=True,  description="Sends latest upload from default channel.")
 	async def send_latest_upload_url(self, ctx):
 		youtube_channel = self.get_default_channel(ctx.guild) 
+		
+		if not youtube_channel:
+			logging.warning("Requested latest upload but no default channel (" + ctx.guild.name + ")")
+			raise commands.CommandNotFound("Command not found, latest")
+
 		search_params = {
 			'channelId': youtube_channel.id,
 			'maxResults': '25',
