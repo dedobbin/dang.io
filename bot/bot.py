@@ -44,6 +44,8 @@ async def send_quote(ctx):
 async def help(ctx):
 	helptext = "```"
 	for command in bot.commands:
+		if command.name == "latest":
+			break #Latest can only be used when default channel is set
 		description = "|".join(command.aliases) if len(command.aliases) else command.name
 		description += f": {command.description}"
 		helptext+=f"{description}\n"
