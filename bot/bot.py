@@ -42,7 +42,6 @@ async def send_quote(ctx):
 
 @bot.command(name="help", description="Shows this message.")
 async def help(ctx):
-	#TODO: nasty, bot shouldn't be directly aware of youtube cog.. should decouple
 	has_default_channel = bool(bot.get_cog("Youtube").get_default_channel(ctx.guild))
 	helptext = "```"
 	
@@ -52,10 +51,10 @@ async def help(ctx):
 			continue 
 		description = "|".join(command.aliases) if len(command.aliases) else command.name
 		description += f": {command.description}"
-		helptext+=f"{description}"
 		if "random" in command.aliases and has_default_channel:
-			#Default param only works when default channel is set
-			helptext+= "Use param 'default' to get from default channel."
+			#Default param only works when default channel is set, bit hacky..
+			description = '.'.join(filter(lambda x: "use param 'default'" not in x, description.split(".")))
+		helptext+=f"{description}"
 		helptext+= "\n"
 	
 	helptext+="```"
