@@ -4,7 +4,7 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from discord.ext import commands
-from helpers import random_datetime_in_range, get_text, get_config, guild_to_config_path
+from helpers import random_datetime_in_range, get_text, get_error_text, get_config, guild_to_config_path
 from dang_error import DangError
 import logging
 
@@ -122,7 +122,7 @@ class Youtube(commands.Cog):
 					pass
 		except googleapiclient.errors.HttpError as e:
 			logging.error("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
-			raise DangError(get_text('errors', 'youtube', guild = guild))
+			raise DangError(get_error_text(guild.id, 'youtube'))
 
 		if all_pages and num_expected != len(items):
 			logging.warning("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
@@ -130,7 +130,7 @@ class Youtube(commands.Cog):
 		#self.search_results.append({'result': response, 'params': params})
 
 		if len(items) == 0:
-			raise DangError(get_text('errors', 'no_videos', guild = guild))
+			raise DangError(get_error_text(guild.id, 'no_videos'))
 
 		return SearchResult(response, params)
 
