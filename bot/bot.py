@@ -51,9 +51,10 @@ async def help(ctx):
 			continue 
 		description = "|".join(command.aliases) if len(command.aliases) else command.name
 		description += f": {command.description}"
-		if "random" in command.aliases and has_default_channel:
+		if "random" in command.aliases and not has_default_channel:
 			#Default param only works when default channel is set, bit hacky..
 			description = '.'.join(filter(lambda x: "use param 'default'" not in x, description.split(".")))
+			print(description)
 		helptext+=f"{description}"
 		helptext+= "\n"
 	
