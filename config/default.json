@@ -1,5 +1,5 @@
 {
-	"spam_freq": 500,
+	"spam_freq": 0,
 	"test" : "default_config",
 	"fallback_test" : "fallback_value",
 	"texts" : {
@@ -7,7 +7,9 @@
 			"yes",
 			"no",
 			"hmmm",
-			"vraagteken"
+			"vraagteken",
+			"based",
+			"cringe"
 		],
 		"happy" : "yay",
 		"next_video" : "i will send teh next video",
