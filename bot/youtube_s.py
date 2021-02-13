@@ -106,7 +106,7 @@ class Youtube_S(commands.Cog):
 	def quit(self):
 		self.driver.close()
 
-	@commands.command(aliases=['obscure', 'obscuur'], pass_context=True,  description="Sends a random obscure video. Param is search query (optional).")
+	@commands.command(aliases=['obscure', 'obscuur'], pass_context=True,  description="Sends a random obscure video. Parameter is search query (optional).\n\nSuccess rate depends on time of day. Also because of the janky nature of this command, using no parameter might cause no video to be find. Just try again!")
 	async def s_latest(self, ctx, *params):
 		async with ctx.typing():
 			start_time = time()

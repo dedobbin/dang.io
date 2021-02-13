@@ -43,23 +43,26 @@ async def send_quote(ctx):
 @bot.command(name="help", description="Shows this message.")
 async def help(ctx):
 	has_default_channel = bool(bot.get_cog("Youtube").get_default_channel(ctx.guild))
-	helptext = "```"
 	
+	embed=discord_api.Embed()
+
 	for command in bot.commands:
 		if command.name == "latest" and not has_default_channel:
 			#Latest can only be used when default channel is set
 			continue 
-		description = "|".join(command.aliases) if len(command.aliases) else command.name
-		description += f": {command.description}"
+		name = "|".join(command.aliases) if len(command.aliases) else command.name
+		description = f"{command.description}"
 		if "random" in command.aliases and not has_default_channel:
 			#Default param only works when default channel is set, bit hacky..
 			description = '.'.join(filter(lambda x: "use param 'default'" not in x, description.split(".")))
-			print(description)
-		helptext+=f"{description}"
-		helptext+= "\n"
+		description+= "\n"
+
+		embed.add_field(name=name, value=description, inline=False)
 	
-	helptext+="```"
-	await ctx.send(helptext)
+	await ctx.send(embed=embed)
+
+	
+	#await ctx.send(helptext)
 
 # TODO: also handle errors in events
 @bot.event
