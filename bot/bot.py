@@ -1,3 +1,7 @@
+#########################################
+######### Shoutouts to Dang Do #########
+#########################################
+
 import os, json, sys, string, csv, datetime
 from dotenv import load_dotenv
 from random import choice, randrange
