@@ -137,7 +137,7 @@ class Youtube(commands.Cog):
 	
 	################# send-commands #################
 
-	@commands.command(name='latest', pass_context=True,  description="Sends latest upload from default channel.")
+	@commands.command(name='latest', pass_context=True,  description="Sends latest upload from default channel. React with 'thumbs down' for next video.")
 	async def send_latest_upload_url(self, ctx):
 		youtube_channel = self.get_default_channel(ctx.guild) 
 		
@@ -172,7 +172,7 @@ class Youtube(commands.Cog):
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
-	@commands.command(aliases=['random', 'willekeurig'], pass_context=True,  description="Send a random video. When a default channel is set, use param 'default' to get from this channel.")
+	@commands.command(aliases=['random', 'willekeurig'], pass_context=True,  description="Send a random video. React with 'thumbs down' for next video. When a default channel is set, use param 'default' to get from this channel.")
 	async def send_random(self, ctx, param = None):
 		search_params = {
 			'maxResults': '50',
