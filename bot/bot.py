@@ -65,9 +65,6 @@ async def help(ctx):
 	
 	await ctx.send(embed=embed)
 
-	
-	#await ctx.send(helptext)
-
 # TODO: also handle errors in events
 @bot.event
 async def on_command_error(ctx, error):

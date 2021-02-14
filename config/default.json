@@ -27,6 +27,7 @@
 		"general" : "i broke",
 		"youtube" : "connection with youtube broke",
 		"no_videos" : "nothing found",
-		"unknown_command" : "unknown command, use `dang! help` for list of valid commands"
+		"unknown_command" : "unknown command, use `dang! help` for list of valid commands",
+		"no_param_search" : "plz use search query"
 	}
 }

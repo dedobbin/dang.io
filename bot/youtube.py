@@ -160,6 +160,7 @@ class Youtube(commands.Cog):
 	async def send_search_result(self, ctx, *params):
 		if len(params) == 0:
 			logging.warning("search without params, aborting.." + "(" + ctx.guild.name + ")")
+			await ctx.send(get_error_text(ctx.guild.id, "no_param_search"))
 			return
 
 		search_params = {
