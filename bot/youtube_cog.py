@@ -51,7 +51,7 @@ class SearchResult:
 		result = search_callback(params)
 		return result
 
-class Youtube(commands.Cog):
+class YoutubeCog(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.youtube_api = None

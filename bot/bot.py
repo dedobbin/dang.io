@@ -8,8 +8,8 @@ from random import choice, randrange
 import discord as discord_api
 from discord.ext import commands
 import inspect
-from youtube import Youtube, YoutubeChannel
-from youtube_s import Youtube_S
+from youtube_cog import YoutubeCog, YoutubeChannel
+from youtube_s_cog import Youtube_S_Cog
 from dang_error import DangError
 from helpers import get_text, get_error_text, get_config, config_files_to_env
 import logging
@@ -24,8 +24,8 @@ config_files_to_env()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix=['dang! ', '!dang ', 'dang!'], help_command=None)
-bot.add_cog(Youtube(bot))
-bot.add_cog(Youtube_S(bot))
+bot.add_cog(YoutubeCog(bot))
+bot.add_cog(Youtube_S_Cog(bot))
 
 def get_random_quote(guild):
 	return choice(get_text(guild.id, "quotes"))

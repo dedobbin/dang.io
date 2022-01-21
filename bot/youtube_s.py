@@ -1,125 +1,110 @@
+import os
+import logging
+import string
+from random import choice
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 # from bs4 import BeautifulSoup
-# import requests
-from time import sleep, time
-from discord.ext import commands
-import string, os
-from helpers import get_text, get_error_text
-from dang_error import DangError
-from random import choice
-import logging
+from selenium import webdriver
 
-########### youtube doesn't like bots, and they increase view count, which is against TOS, so use at own risk
+class Youtube_S:
+    param_last_hour = {"sp" : "EgQIARAB"}  #TODO: make it possible to obtain these obfuscated params, even though they haven't changed in a year..
+    
+    def __init__(self, fast_mode = False):
+        self.fast_mode = fast_mode
+        option = webdriver.ChromeOptions()
+        if not os.getenv("DEBUG_MODE"):
+            option.add_argument("--headless")
+            option.add_argument('--disable-gpu')
+        try:
+            self.driver = webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=option)
+        except Exception as e:
+            logging.error("couldn't start web driver:" +  str(e))
+            raise e
+    
+    def get_obscure_videos(self, *params):
+        search_params = self.param_last_hour
+        search_params['search_query'] = ' '.join(params) if len(list (params)) > 0  else ''.join(choice(string.ascii_lowercase) for i in range(3))
+        items = self.get_videos(search_params)
 
-class Youtube_S(commands.Cog):
-	param_last_hour = {"sp" : "EgQIARAB"}
-	fast_mode = os.getenv("YOUTUBE_S_FAST_MODE")
+        if not self.fast_mode:
+            CUT_OFF_POINT = 100
+            items = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
+        
+        return items
 
-	def __init__(self, bot):
-		option = webdriver.ChromeOptions()
-		if not os.getenv("DEBUG_MODE"):
-			option.add_argument("--headless")
-			option.add_argument('--disable-gpu')
-		try:
-			self.driver = webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=option)
-		except Exception as e:
-			logging.error("couldn't start web driver:" +  str(e))
-		self.bot = bot
+    #TODO: example how to call with search params like in get_obscure_videos
+    def get_videos(self, params):
+        self.driver.get(self.__create_url(params))
+        if not self.fast_mode:
+            self.__scroll_to_bottom()
+        
+        raw_items = self.driver.find_elements_by_css_selector("ytd-video-renderer")
 
+        videos = []
 
-	def scroll_to_bottom(self):
-		# pretty jank, but works usually 
-		# TODO: finetune for faster responses, don't need all results
-		body = self.driver.find_element_by_css_selector("body")
-		for i in range (0, 100):
-			body.send_keys(Keys.PAGE_DOWN)
-		return
+        for raw_item in raw_items:
+            video = {"live": False}
+            thumbnail = raw_item.find_element_by_css_selector("#thumbnail")
+            video['url'] = thumbnail.get_attribute("href")
 
-	def create_url(self, params):
-		url = "https://www.youtube.com/results"
+            # TODO: grab title
+            # title = raw_item.find_elements_by_css_selector("#video-title")
 
-		if len(params) > 0:
-			url += "?"
-			for key in params:
-				url+= key + "=" + params[key] + "&"
-			url =  url.rstrip("&")
-		
-		return url
+            # Check if live
+            elements = raw_item.find_elements_by_css_selector('[class="style-scope ytd-badge-supported-renderer"]')
+            for element in elements:
+                if "LIVE" in element.get_attribute('innerHTML') or "PREMIERING" in element.get_attribute('innerHTML'):
+                    video['live'] = True
+                    # If is live and no views, views don't show up, default to 0
+                    video['views'] = 0
 
-	def parse_views_html(self, inner_html):
-		if "K" in inner_html:
-			# uh..
-			res = (inner_html.replace("K", "000") if not "." in inner_html else inner_html.replace(".", "") + "00").replace("K", "").replace(" ", "")
-		else:
-			res = inner_html.replace("No", "0")
+            ## Views
+            meta_blocks = raw_item.find_elements_by_css_selector("span.style-scope.ytd-video-meta-block")
+            for block in meta_blocks:
+                inner_html = block.get_attribute('innerHTML')
+                if "view" in inner_html or "watching" in inner_html:
+                    video["views"] = self.__parse_views_html(inner_html)
+                if "Scheduled for" in inner_html:
+                    video["views"] = 0
 
-		res = int(''.join(filter(str.isdigit, res)))
-	
-		return res
+            videos.append(video)
+            if self.fast_mode:
+                break
 
-	def get_videos(self, params, guild = None):
-		self.driver.get(self.create_url(params))
-		if not self.fast_mode:
-			self.scroll_to_bottom()
-		
-		raw_items = self.driver.find_elements_by_css_selector("ytd-video-renderer")
+        return videos
 
-		videos = []
+    def quit(self):
+        self.driver.close()
 
-		for raw_item in raw_items:
-			video = {"live": False}
-			thumbnail = raw_item.find_element_by_css_selector("#thumbnail")
-			video['url'] = thumbnail.get_attribute("href")
+    def __scroll_to_bottom(self):
+        # pretty jank, but works usually 
+        # TODO: finetune for faster responses, don't need all results
+        body = self.driver.find_element_by_css_selector("body")
+        for i in range (0, 100):
+            body.send_keys(Keys.PAGE_DOWN)
+        return
 
-			# TODO: grab title
-			# title = raw_item.find_elements_by_css_selector("#video-title")
+    def __create_url(self, params):
+        url = "https://www.youtube.com/results"
 
-			# Check if live
-			elements = raw_item.find_elements_by_css_selector('[class="style-scope ytd-badge-supported-renderer"]')
-			for element in elements:
-				if "LIVE" in element.get_attribute('innerHTML') or "PREMIERING" in element.get_attribute('innerHTML'):
-					video['live'] = True
-					# If is live and no views, views don't show up, default to 0
-					video['views'] = 0
+        if len(params) > 0:
+            url += "?"
+            for key in params:
+                url+= key + "=" + params[key] + "&"
+            url =  url.rstrip("&")
+        
+        return url
 
-			## Views
-			meta_blocks = raw_item.find_elements_by_css_selector("span.style-scope.ytd-video-meta-block")
-			for block in meta_blocks:
-				inner_html = block.get_attribute('innerHTML')
-				if "view" in inner_html or "watching" in inner_html:
-					video["views"] = self.parse_views_html(inner_html)
-				if "Scheduled for" in inner_html:
-					video["views"] = 0
+    def __parse_views_html(self, inner_html):
+        if "K" in inner_html:
+            # uh..
+            res = (inner_html.replace("K", "000") if not "." in inner_html else inner_html.replace(".", "") + "00").replace("K", "").replace(" ", "")
+        else:
+            res = inner_html.replace("No", "0")
 
-			videos.append(video)
-			if self.fast_mode:
-				break
+        res = int(''.join(filter(str.isdigit, res)))
 
-		if len(videos) == 0:
-			raise DangError(get_error_text(guild.id, "no_videos"))
-		
-		return videos
-
-	def quit(self):
-		self.driver.close()
-
-	@commands.command(aliases=['obscure', 'obscuur'], pass_context=True,  description="Sends a random obscure video. Parameter is search query (optional).\n\nSuccess rate depends on time of day. Also because of the janky nature of this command, using no parameter might cause no video to be find. Just try again!")
-	async def s_latest(self, ctx, *params):
-		async with ctx.typing():
-			start_time = time()
-			search_params = self.param_last_hour
-			search_params['search_query'] = ' '.join(params) if len(list (params)) > 0  else ''.join(choice(string.ascii_lowercase) for i in range(3))
-
-			items = self.get_videos(search_params, ctx.guild)
-
-			low_views = []
-			if not self.fast_mode:
-				CUT_OFF_POINT = 100
-				low_views = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
-			
-			logging.info("Youtube_s took %s seconds" % (time() - start_time))
-
-			await ctx.send(choice(low_views)["url"] if len(low_views) > 0 else choice(items)['url'])		
+        return res
