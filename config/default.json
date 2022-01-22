@@ -18,6 +18,7 @@
 			"The world seems full of good men, even if there are monsters in it",
 			"There are bad dreams for those who sleep unwisely"
 		],
+		"youtube_s_fallback" : "I couldn't find anything for that, so have this video instead ",
 		"some_text" : "this is some text",
 		"some_test_text" : {
 			"some_inner_test" : "this should not display in tests"
