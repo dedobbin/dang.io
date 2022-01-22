@@ -24,6 +24,7 @@ class Youtube_S_Cog(commands.Cog):
 		if not self.youtube_s:
 			logging.error(ctx.guild.name + " tried to use youtube_s, but it didn't come up on startup")
 			raise DangError(get_error_text(ctx.guild.id, "youtube_s"))
+		
 		start_time = time()
 
 		async with ctx.typing():

@@ -1,12 +1,11 @@
-import sys, os, string, datetime, json
+import os, string, datetime, logging
 from random import choice, randrange
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from discord.ext import commands
-from helpers import random_datetime_in_range, get_text, get_error_text, get_config, guild_to_config_path
+from helpers import random_datetime_in_range, get_text, get_error_text, get_config
 from dang_error import DangError
-import logging
 
 class YoutubeChannel:
 	def __init__(self, id, first_upload_datetime = datetime.datetime(2005, 4, 1)):

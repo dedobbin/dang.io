@@ -1,7 +1,5 @@
-import datetime, os, json, re, os
+import datetime, os, json, logging
 from random import randrange
-import os
-
 
 debug_bool = True
 
@@ -39,17 +37,15 @@ def get_config(guild_id, *keys):
 	if not keys[0] in config:
 		config = json.loads(os.getenv("config_default"))
 		if not keys[0] in config:
+			logging.error(f"get_config: config not found for {guild_id}: {keys}")
 			return ""
 
 	try:
 		for key in keys:
 			config = config[key]
 	except:
-		config = ""
+		logging.error(f"get_config: config not found for guild {guild_id}: {keys}")
 	return config
-
-def guild_to_config_path(guild):
-	return ""
 
 def config_files_to_env():
 	for file in os.listdir("config"):
