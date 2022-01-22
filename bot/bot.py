@@ -46,7 +46,7 @@ async def send_quote(ctx):
 
 @bot.command(name="help", description="Shows this message.")
 async def help(ctx):
-	has_default_channel = bool(bot.get_cog("Youtube").get_default_channel(ctx.guild))
+	has_default_channel = bool(bot.get_cog("YoutubeCog").get_default_channel(ctx.guild))
 	
 	embed=discord_api.Embed()
 
