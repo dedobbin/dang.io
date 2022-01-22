@@ -24,11 +24,13 @@ class Youtube_S_Cog(commands.Cog):
 
 		logging.info("Youtube_s took %s seconds" % (time() - start_time))
 
-		if len(items) == 0:
-			#No videos found, try again with no params
+		message = ""
+		if len(items) == 0 and len(params) > 0:
+			#No videos found with search term, try again without it as fallback
 			items = self.youtube_s.get_obscure_videos()
-			if len(items) == 0:
-				raise DangError(get_error_text(ctx.guild.id, "no_videos"))
-			await ctx.send("I couldn't find anything for that, so have this video instead " +  choice(items)["url"])
-		else:
-			await ctx.send(choice(items)["url"])		
+			message = "I couldn't find anything for that, so have this video instead "
+		
+		if len(items) == 0:
+			raise DangError(get_error_text(ctx.guild.id, "no_videos"))
+
+		await ctx.send(message + choice(items)["url"])				
