@@ -12,17 +12,18 @@ from youtube_s_cog import Youtube_S_Cog
 from dang_error import DangError
 from helpers import get_text, get_error_text, get_config, config_files_to_env
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=logging.INFO)
+if __name__ == '__main__':
+	load_dotenv()
+	config_files_to_env()
 
-load_dotenv()
-config_files_to_env()
+	logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=logging.INFO)
 
+	DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-
-bot = commands.Bot(command_prefix=['dang! ', '!dang ', 'dang!'], help_command=None)
-bot.add_cog(YoutubeCog(bot))
-bot.add_cog(Youtube_S_Cog(bot))
+	bot = commands.Bot(command_prefix=['dang! ', '!dang ', 'dang!'], help_command=None)
+	bot.add_cog(YoutubeCog(bot))
+	bot.add_cog(Youtube_S_Cog(bot))
+	bot.run(DISCORD_TOKEN)
 
 def get_random_quote(guild):
 	return choice(get_text(guild.id, "quotes"))
@@ -97,5 +98,3 @@ async def on_message(message):
 		await message.channel.send(get_random_quote(message.guild))
 
 	await bot.process_commands(message)
-
-bot.run(DISCORD_TOKEN)
