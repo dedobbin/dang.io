@@ -12,8 +12,7 @@ from youtube_s_cog import Youtube_S_Cog
 from dang_error import DangError
 from helpers import get_text, get_error_text, get_config, config_files_to_env
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=logging.INFO)
 
 load_dotenv()
 config_files_to_env()
