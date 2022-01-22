@@ -9,6 +9,8 @@ from selenium.webdriver.chrome.options import Options
 # from bs4 import BeautifulSoup
 from selenium import webdriver
 
+########### youtube doesn't like bots, and they increase view count, which is against TOS, so use at own risk
+
 class Youtube_S:
     param_last_hour = {"sp" : "EgQIARAB"}  #TODO: make it possible to obtain these obfuscated params, even though they haven't changed in a year..
     

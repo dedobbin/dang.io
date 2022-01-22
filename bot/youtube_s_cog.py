@@ -7,8 +7,6 @@ from random import choice
 import logging
 from youtube_s import Youtube_S
 
-########### youtube doesn't like bots, and they increase view count, which is against TOS, so use at own risk
-
 class Youtube_S_Cog(commands.Cog):
 	def __init__(self, bot):
 		fastMode = os.getenv("YOUTUBE_S_FAST_MODE")
