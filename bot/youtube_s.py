@@ -79,6 +79,9 @@ class Youtube_S:
     def quit(self):
         self.driver.close()
 
+    def sanity_check(self):
+        return not not self.driver
+
     def __scroll_to_bottom(self):
         # pretty jank, but works usually 
         # TODO: finetune for faster responses, don't need all results

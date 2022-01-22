@@ -12,11 +12,17 @@ from youtube_s import Youtube_S
 class Youtube_S_Cog(commands.Cog):
 	def __init__(self, bot):
 		fastMode = os.getenv("YOUTUBE_S_FAST_MODE")
-		self.youtube_s = Youtube_S(fastMode)
+		try:
+			self.youtube_s = Youtube_S(fastMode)
+		except:
+			self.youtube_s = None
+			pass
 		self.bot = bot
 
 	@commands.command(aliases=['obscure', 'obscuur'], pass_context=True,  description="Sends a random obscure video. Parameter is search query (optional).\n\nSuccess rate depends on time of day. Also because of the janky nature of this command, using no parameter might cause no video to be find. Just try again!")
 	async def s_latest(self, ctx, *params):
+		if not self.youtube_s:
+			raise DangError(get_error_text(ctx.guild.id, "youtube_s"))
 		start_time = time()
 
 		async with ctx.typing():

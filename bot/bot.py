@@ -2,17 +2,15 @@
 ######### Shoutouts to Dang Do #########
 #########################################
 
-import os, json, sys, string, csv, datetime
+import os, logging
 from dotenv import load_dotenv
 from random import choice, randrange
 import discord as discord_api
 from discord.ext import commands
-import inspect
-from youtube_cog import YoutubeCog, YoutubeChannel
+from youtube_cog import YoutubeCog
 from youtube_s_cog import Youtube_S_Cog
 from dang_error import DangError
 from helpers import get_text, get_error_text, get_config, config_files_to_env
-import logging
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
