@@ -38,6 +38,6 @@ class Youtube_S_Cog(commands.Cog):
 			message = get_text(ctx.guild.id, "youtube_s_fallback")
 		
 		if len(items) == 0:
-			raise DangError(get_error_text(ctx.guild.id, "no_videos"))
+			raise DangError(get_error_text(ctx.guild.id, "no_videos_try_again"))
 
 		await ctx.send(message + choice(items)["url"])				

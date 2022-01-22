@@ -28,7 +28,8 @@
 		"general" : "i broke",
 		"youtube" : "connection with youtube broke",
 		"youtube_s" : "something is wrong, plz contact an admin",
-		"no_videos" : "nothing found, try again!",
+		"no_videos" : "nothing found",
+		"no_videos_try_again" : "nothing found, try again!",
 		"unknown_command" : "unknown command, use `dang! help` for list of valid commands",
 		"no_param_search" : "plz use search query"
 	}
