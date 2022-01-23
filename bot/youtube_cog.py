@@ -1,140 +1,17 @@
-import os, string, datetime, logging
-from random import choice, randrange
-import google_auth_oauthlib.flow
-import googleapiclient.discovery
-import googleapiclient.errors
+import string, datetime, logging
+from random import choice
 from discord.ext import commands
-from config import get_text, get_error_text, get_config
-from dang_error import DangError
+import config
 from helpers import random_datetime_in_range
-class YoutubeChannel:
-	def __init__(self, id, first_upload_datetime = datetime.datetime(2005, 4, 1)):
-		self.id = id
-		self.first_upload_datetime = first_upload_datetime
-
-class SearchResult: 
-	def __init__(self, result, params):
-		self.params = params
-		self.result = result
-		
-		# points to last accessed item, so can get next etc
-		self.cursor = None
-
-	def random_item(self):
-		if len(self.result['items']) == 0:
-			raise DangError("geen videos gevonden???")
-		
-		self.cursor = randrange(0, len(self.result['items']))
-		return self.result['items'][self.cursor]
-
-	def first_item(self):
-		if len(self.result['items']) == 0:
-			raise DangError("geen videos gevonden???")
-		
-		self.cursor = 0
-		return self.result['items'][self.cursor]
-
-	# Returns none if no next exists, so can get next page
-	def next_item(self):		
-		try:
-			item = self.result['items'][self.cursor + 1]
-			self.cursor += 1
-			return item
-		except KeyError as e:
-			logging.warning('no next video in search result..')
-			return None
-
-	def get_next_page(self, search_callback):
-		params = self.params
-		params['pageToken'] = self.result['nextPageToken']
-		result = search_callback(params)
-		return result
-
+from youtube import Youtube, YoutubeChannel
 class YoutubeCog(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
-		self.youtube_api = None
+		self.youtube = Youtube()
 
 		# maps search results to sent message ID after sending, so can look up when reaction on message comes in 
 		self.video_messages = {}
 		self.max_video_message_history = 10
-		try:
-			self.youtube_auth()
-		except Exception as e:
-			logging.error("Failed to connect to youtube " + str(e))
-
-	def youtube_auth(self, oauth = False):
-		api_service_name = "youtube"
-		api_version = "v3"
-
-		# YOUTUBE_SECRET_FILE should be file with JSON obtained from https://console.developers.google.com/apis/credentials, OAuth 2.0-client-ID's 
-		# YOUTUBE_API_KEY can also be obtained from there
-		YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY');
-		YOUTUBE_SECRET_FILE = os.getenv('YOUTUBE_SECRETS_FILE')
-
-		if oauth:
-			scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-			youtube_oath_flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(YOUTUBE_SECRET_FILE, scopes)
-			credentials = youtube_oath_flow.run_console()
-			self.youtube_api = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials)
-		else:
-			self.youtube_api = googleapiclient.discovery.build(api_service_name, api_version, developerKey=YOUTUBE_API_KEY)
-	
-	def get_default_channel(self, guild):
-		data = get_config(guild.id, "youtube_default_channel")
-		if not data:
-			return None
-		# TODO: get first upload date automagically, oh this seems not possible through youtube api
-		y, m, d = data['first_upload_date'].split('-')
-
-		first_upload_date = datetime.datetime(int(y), int(m), int(d))
-		return YoutubeChannel(data['id'], first_upload_date)
-
-	# Adds search result to history + returns index key of entry in history
-	def search(self, dynamic_params, all_pages = False, guild = None):
-		static_params = {"part":"snippet"}
-
-		params = {**static_params, **dynamic_params}
-
-		num_expected = 0
-		items = []
-		try:
-			request = self.youtube_api.search().list(**params)
-			response = request.execute()
-			items = response['items']
-
-			num_expected = response['pageInfo']['totalResults']
-			if (all_pages):
-				try:
-					next_page = response['nextPageToken']
-					while True:
-						request = self.youtube_api.search().list(
-							part="snippet", 
-							#channelId=default_flavor['id'],
-							maxResults="50",
-							pageToken=next_page
-						)
-						response = request.execute()
-						items += response['items']
-						next_page = response['nextPageToken']
-				except KeyError as e:
-					pass
-		except googleapiclient.errors.HttpError as e:
-			logging.error("Failed to connect to Youtube: " + getattr(e, 'message', repr(e)))
-			raise DangError(get_error_text(guild.id, 'youtube'))
-
-		if all_pages and num_expected != len(items):
-			logging.warning("Only got " + str(len(items)) + " of " + str(num_expected) + "videos?")
-
-		#self.search_results.append({'result': response, 'params': params})
-
-		if len(items) == 0:
-			raise DangError(get_error_text(guild.id, 'no_videos'))
-
-		return SearchResult(response, params)
-
-	
-	################# send-commands #################
 
 	@commands.command(name='latest', pass_context=True,  description="Sends latest upload from default channel. React with 'thumbs down' for next video.")
 	async def send_latest_upload_url(self, ctx):
@@ -151,7 +28,7 @@ class YoutubeCog(commands.Cog):
 			'type': 'video'
 		}
 
-		result = self.search(search_params, guild = ctx.guild)
+		result = self.youtube.search(search_params, guild = ctx.guild)
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
@@ -159,7 +36,7 @@ class YoutubeCog(commands.Cog):
 	async def send_search_result(self, ctx, *params):
 		if len(params) == 0:
 			logging.warning("search without params, aborting.." + "(" + ctx.guild.name + ")")
-			await ctx.send(get_error_text(ctx.guild.id, "no_param_search"))
+			await ctx.send(config.get_error_text(ctx.guild.id, "no_param_search"))
 			return
 
 		search_params = {
@@ -168,7 +45,7 @@ class YoutubeCog(commands.Cog):
 			'type': 'video'
 		}
 
-		result = self.search(search_params, guild = ctx.guild)
+		result = self.youtube.search(search_params, guild = ctx.guild)
 		item = result.first_item()
 		await self.send_video(ctx.message.channel, item, result)
 
@@ -206,7 +83,7 @@ class YoutubeCog(commands.Cog):
 			logging.error("Unknown param for search: " + param)
 			return
 
-		result = self.search(search_params, guild = ctx.guild)
+		result = self.youtube.search(search_params, guild = ctx.guild)
 		item = result.random_item()
 		await self.send_video(ctx, item, result)
 
@@ -219,7 +96,7 @@ class YoutubeCog(commands.Cog):
 				associated_search_result = self.video_messages[reaction.message.id]
 				# TODO: if random video was searched, random random one instead of next
 
-				await reaction.message.channel.send(get_text(reaction.message.guild.id, "next_video"))
+				await reaction.message.channel.send(config.get_text(reaction.message.guild.id, "next_video"))
 				next_video = associated_search_result.next_item()
 				if not next_video:
 					associated_search_result = associated_search_result.get_next_page(self.search)
@@ -239,3 +116,13 @@ class YoutubeCog(commands.Cog):
 				# key 0 is lowest message ID, so oldest, remove that one..
 				del self.video_messages[list(self.video_messages.keys())[0]]
 			self.video_messages[message.id] = search_result
+
+	def get_default_channel(self, guild):
+		data = config.get_config(guild.id, "youtube_default_channel")
+		if not data:
+			return None
+		# TODO: get first upload date automagically, oh this seems not possible through youtube api
+		y, m, d = data['first_upload_date'].split('-')
+
+		first_upload_date = datetime.datetime(int(y), int(m), int(d))
+		return YoutubeChannel(data['id'], first_upload_date)
