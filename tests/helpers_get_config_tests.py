@@ -43,6 +43,7 @@ class test_helpers_get_config(unittest.TestCase):
     def tearDownClass(cls):
         logging.getLogger().disabled = False
         del os.environ['config_default']
+        del os.environ['config_3']
 
     def test_nonexistant_config_key_default(self):
         self.assertEqual(helpers.get_config( "default", "nonexistant"), "")
@@ -77,26 +78,8 @@ class test_helpers_get_config(unittest.TestCase):
         self.assertEqual(helpers.get_config("12", "nested_test", "layer_one"), {"layer_two" : "default_core"})
         self.assertEqual(helpers.get_config("12", "nested_test", "layer_one", "layer_two"), "default_core")
     
-    def test_nested_data_guild_does_not_fallback_when_first_layer_entered(self):
-        #TODO: this returns an empty dict, because works with nested, not sure if this is desired..
-        self.assertEqual(helpers.get_config("3", "second_nest", "layer_one"), {})
-
-    def test_report_exception_when_no_default_config(self):
-        default_config = os.environ["config_default"]
-        del os.environ['config_default']
-        occured_exception = None
-        
-        #this prevents exception being thrown out - the restoring of env must always happen
-        #TODO: find more elegant solution for this
-        try: 
-            self.assertEqual(helpers.get_config( "default", "test"), "")
-        except Exception as e:
-            occured_exception = e
-        
-        os.environ["config_default"] = default_config
-
-        if occured_exception:
-            raise occured_exception
+    def test_nested_data_guild_fallback(self):
+        self.assertEqual(helpers.get_config("3", "second_nest", "layer_one"), "second_default_core")
 
 if __name__ == '__main__':
     unittest.main()

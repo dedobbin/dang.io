@@ -11,6 +11,7 @@ class test_helpers_get_error_text(unittest.TestCase):
     def setUpClass(cls):
         logging.getLogger().disabled = True
 
+        #In production this is based on confile files
         os.environ["config_default"] = json.dumps({
             "error_texts" : {
                 "one" : "default_error_one",
@@ -18,6 +19,7 @@ class test_helpers_get_error_text(unittest.TestCase):
             }
         })
 
+        #The config for a guild with ID 3
         os.environ["config_3"] = json.dumps({
             "error_texts" : {
                 "one" : "guild_error_one",
@@ -33,6 +35,7 @@ class test_helpers_get_error_text(unittest.TestCase):
     def tearDownClass(cls):
         logging.getLogger().disabled = False
         del os.environ['config_default']
+        del os.environ['config_3']
 
     def test_get_error_text_default(self):
         self.assertEqual(helpers.get_error_text( "default", "one"), "default_error_one")
@@ -54,6 +57,12 @@ class test_helpers_get_error_text(unittest.TestCase):
     
     def test_get_error_text_unknown_guild_with_fallback(self):
         self.assertEqual(helpers.get_error_text( "12", "two"), "default_error_two")
+
+    def test_can_get_nested_object(self):
+        self.assertEqual(helpers.get_error_text("3", "nested", "layer_one"), {"layer_two":"guild_core"})
+    
+    def test_can_get_nested_string(self):
+        self.assertEqual(helpers.get_error_text("3", "nested", "layer_one", "layer_two"), "guild_core")
 
 
 if __name__ == '__main__':

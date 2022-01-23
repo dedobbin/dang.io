@@ -11,6 +11,7 @@ class test_helpers_get_texts(unittest.TestCase):
     def setUpClass(cls):
         logging.getLogger().disabled = True
 
+        #In production this is based on confile files
         os.environ["config_default"] = json.dumps({
             "texts" : {
                 "one" : "default_text_one",
@@ -18,6 +19,7 @@ class test_helpers_get_texts(unittest.TestCase):
             }
         })
 
+        #The config for a guild with ID 3
         os.environ["config_3"] = json.dumps({
             "texts" : {
                 "one" : "guild_text_one",
@@ -33,6 +35,7 @@ class test_helpers_get_texts(unittest.TestCase):
     def tearDownClass(cls):
         logging.getLogger().disabled = False
         del os.environ['config_default']
+        del os.environ['config_3']
 
     def test_get_text_default(self):
         self.assertEqual(helpers.get_text( "default", "one"), "default_text_one")
@@ -60,7 +63,6 @@ class test_helpers_get_texts(unittest.TestCase):
     
     def test_can_get_nested_string(self):
         self.assertEqual(helpers.get_text("3", "nested", "layer_one", "layer_two"), "guild_core")
-
 
 if __name__ == '__main__':
     unittest.main()
