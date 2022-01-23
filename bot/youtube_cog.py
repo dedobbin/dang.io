@@ -4,9 +4,9 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from discord.ext import commands
-from helpers import random_datetime_in_range, get_text, get_error_text, get_config
+from config import get_text, get_error_text, get_config
 from dang_error import DangError
-
+from helpers import random_datetime_in_range
 class YoutubeChannel:
 	def __init__(self, id, first_upload_datetime = datetime.datetime(2005, 4, 1)):
 		self.id = id

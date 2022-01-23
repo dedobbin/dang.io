@@ -10,7 +10,7 @@ from discord.ext import commands
 from youtube_cog import YoutubeCog
 from youtube_s_cog import Youtube_S_Cog
 from dang_error import DangError
-from helpers import get_text, get_error_text, get_config, config_files_to_env
+from config import get_text, get_error_text, get_config, config_files_to_env
 
 load_dotenv()
 config_files_to_env()

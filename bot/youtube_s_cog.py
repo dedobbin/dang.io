@@ -1,7 +1,7 @@
 from time import sleep, time
 from discord.ext import commands
 import os
-from helpers import get_text, get_error_text
+from config import get_text, get_error_text
 from dang_error import DangError
 from random import choice
 import logging
