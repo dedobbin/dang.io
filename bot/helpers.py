@@ -32,10 +32,10 @@ def get_config(guild_id, *keys):
 	try:
 		config = json.loads(os.getenv(env_key))
 	except:
-		config = json.loads(os.getenv("config_default"))
+		config = __get_default_config()
 
 	if not keys[0] in config:
-		config = json.loads(os.getenv("config_default"))
+		config = __get_default_config()
 		if not keys[0] in config:
 			logging.error(f"get_config: config not found for {guild_id}: {keys}")
 			return ""
@@ -53,36 +53,6 @@ def config_files_to_env():
 			data = json.load(f)
 			os.environ["config_" + file.rstrip(".json")] = json.dumps(data)
 
-# Test stuff
-if __name__ == "__main__":
-	from dotenv import load_dotenv
-	load_dotenv()
-
-	config_files_to_env()
-	
-	assert "" == get_config( os.getenv("TEST_GUILD_ID"), "nonexistant")
-
-	assert "" == get_config(None, "nonexistant")
-
-	assert "guild_config" == get_config(os.getenv("TEST_GUILD_ID"),"test")
-
-	data = get_config(os.getenv("TEST_GUILD_ID"),"nested_test", "layer_one")
-	assert (data["layer_two"] == "core")
-	
-	assert "core" == get_config(os.getenv("TEST_GUILD_ID"),"nested_test", "layer_one", "layer_two")
-
-	assert "" == get_config(os.getenv("TEST_GUILD_ID"),"nested_test", "layer_one", "layer_two", "nonexistant")
-
-	assert "default_config" == get_config(None, "test")
-
-	assert "default_config" == get_config("nonexistant", "test")
-
-	assert "fallback_value" == get_config(os.getenv("TEST_GUILD_ID"), "fallback_test")
-	
-	assert "niks" in get_error_text(os.getenv("TEST_GUILD_ID"), "no_videos")
-
-	assert "this is some text" == get_text(os.getenv("TEST_GUILD_ID"), "some_text")
-
-	assert "nothing found" == get_error_text("nonexistant", "no_videos")
-
-
+def __get_default_config():
+	json_data = os.getenv("config_default")
+	return json.loads(json_data) if json_data else {}
