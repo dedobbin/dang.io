@@ -30,7 +30,6 @@ class Youtube_S:
         search_params = self.param_last_hour
         search_params['search_query'] = ' '.join(params) if len(list (params)) > 0  else ''.join(choice(string.ascii_lowercase) for i in range(3))
         items = self.get_videos(search_params)
-
         if not self.fast_mode:
             CUT_OFF_POINT = 100
             items = list(filter(lambda x: (x['views'] <= CUT_OFF_POINT), items))  
@@ -48,7 +47,8 @@ class Youtube_S:
         videos = []
 
         for raw_item in raw_items:
-            video = {"live": False}
+            #TODO: it seems there is a case where views are not correctly scraped
+            video = {"live": False, "views": 0}
             thumbnail = raw_item.find_element_by_css_selector("#thumbnail")
             video['url'] = thumbnail.get_attribute("href")
 
@@ -85,7 +85,11 @@ class Youtube_S:
         return not not self.driver
 
     def create_web_driver(self, options):
-        return webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=options)
+        args = {'options': options}
+        path = os.getenv('CHROME_EXECUTABLE_PATH')
+        if path:
+            args['executable_path'] = path
+        return webdriver.Chrome(**args)
 
     def __scroll_to_bottom(self):
         # pretty jank, but works usually 

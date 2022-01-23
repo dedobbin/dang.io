@@ -12,7 +12,8 @@ class Youtube_S_Cog(commands.Cog):
 		fastMode = os.getenv("YOUTUBE_S_FAST_MODE")
 		try:
 			self.youtube_s = Youtube_S(fastMode)
-		except:
+		except Exception as e:
+			#logging.error(f"Could not start Youtube_S: {e}")
 			self.youtube_s = None
 			pass
 		self.bot = bot
