@@ -6,7 +6,7 @@ sys.path.append(
 import bot.helpers as helpers
 
 
-class test_helpers_get_config(unittest.TestCase):
+class test_helpers_get_texts(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         logging.getLogger().disabled = True
@@ -47,7 +47,7 @@ class test_helpers_get_config(unittest.TestCase):
         self.assertEqual(helpers.get_text( "3", "three"), "")
 
     def test_get_text_guild_fallback_to_default(self):
-        self.assertEqual(helpers.get_text( "3", "two"), "")
+        self.assertEqual(helpers.get_text( "3", "two"), "default_text_two")
 
     def test_get_text_unknown_guild_no_fallback(self):
         self.assertEqual(helpers.get_text( "12", "three"), "")
@@ -55,8 +55,11 @@ class test_helpers_get_config(unittest.TestCase):
     def test_get_text_unknown_guild_with_fallback(self):
         self.assertEqual(helpers.get_text( "12", "two"), "default_text_two")
 
-    def test_can_get_nested(self):
-        self.assertEqual(helpers.get_text("3"), "nested", "layer_one", {"layer_two":"core"})
+    def test_can_get_nested_object(self):
+        self.assertEqual(helpers.get_text("3", "nested", "layer_one"), {"layer_two":"guild_core"})
+    
+    def test_can_get_nested_string(self):
+        self.assertEqual(helpers.get_text("3", "nested", "layer_one", "layer_two"), "guild_core")
 
 
 if __name__ == '__main__':

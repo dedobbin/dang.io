@@ -45,6 +45,7 @@ def get_config(guild_id, *keys):
 			config = config[key]
 	except:
 		logging.error(f"get_config: config not found for guild {guild_id}: {keys}")
+		config = ""
 	return config
 
 def config_files_to_env():

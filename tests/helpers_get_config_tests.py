@@ -44,42 +44,42 @@ class test_helpers_get_config(unittest.TestCase):
         logging.getLogger().disabled = False
         del os.environ['config_default']
 
-    # def test_nonexistant_config_key_default(self):
-    #     self.assertEqual(helpers.get_config( "default", "nonexistant"), "")
+    def test_nonexistant_config_key_default(self):
+        self.assertEqual(helpers.get_config( "default", "nonexistant"), "")
 
-    # def test_existant_config_key_default(self):
-    #     self.assertEqual(helpers.get_config( "default", "test"), "default_config")
+    def test_existant_config_key_default(self):
+        self.assertEqual(helpers.get_config( "default", "test"), "default_config")
 
-    # def test_nonexistant_config_key_guild(self):
-    #     self.assertEqual(helpers.get_config( "3", "nonexistant"), "")
+    def test_nonexistant_config_key_guild(self):
+        self.assertEqual(helpers.get_config( "3", "nonexistant"), "")
 
-    # def test_guild_gets_their_own_config_values(self):
-    #     self.assertEqual(helpers.get_config("3","test"), "guild_config")
+    def test_guild_gets_their_own_config_values(self):
+        self.assertEqual(helpers.get_config("3","test"), "guild_config")
 
-    # def test_guild_gets_default_for_nonexisting_key(self):
-    #     self.assertEqual(helpers.get_config("3", "fallback_test"), "fallback_value")
+    def test_guild_gets_default_for_nonexisting_key(self):
+        self.assertEqual(helpers.get_config("3", "fallback_test"), "fallback_value")
     
-    # def test_unknown_guild_get_gets_default(self):
-    #     self.assertEqual(helpers.get_config("12", "fallback_test"), "fallback_value")
+    def test_unknown_guild_get_gets_default(self):
+        self.assertEqual(helpers.get_config("12", "fallback_test"), "fallback_value")
     
-    # def test_unknown_guild_nonexistant_key(self):
-    #     self.assertEqual(helpers.get_config("12", "nonexistant"), "")
+    def test_unknown_guild_nonexistant_key(self):
+        self.assertEqual(helpers.get_config("12", "nonexistant"), "")
     
-    # def test_nested_data_guild(self):
-    #     self.assertEqual(helpers.get_config("3", "nested_test", "layer_one"), {"layer_two" : "guild_core"})
-    #     self.assertEqual(helpers.get_config("3", "nested_test", "layer_one", "layer_two"), "guild_core")
+    def test_nested_data_guild(self):
+        self.assertEqual(helpers.get_config("3", "nested_test", "layer_one"), {"layer_two" : "guild_core"})
+        self.assertEqual(helpers.get_config("3", "nested_test", "layer_one", "layer_two"), "guild_core")
 
-    # def test_nested_data_default(self):
-    #     self.assertEqual(helpers.get_config("default", "nested_test", "layer_one"), {"layer_two" : "default_core"})
-    #     self.assertEqual(helpers.get_config("default", "nested_test", "layer_one", "layer_two"), "default_core")
+    def test_nested_data_default(self):
+        self.assertEqual(helpers.get_config("default", "nested_test", "layer_one"), {"layer_two" : "default_core"})
+        self.assertEqual(helpers.get_config("default", "nested_test", "layer_one", "layer_two"), "default_core")
 
-    # def test_nested_data_unknown_guild(self):
-    #     self.assertEqual(helpers.get_config("12", "nested_test", "layer_one"), {"layer_two" : "default_core"})
-    #     self.assertEqual(helpers.get_config("12", "nested_test", "layer_one", "layer_two"), "default_core")
+    def test_nested_data_unknown_guild(self):
+        self.assertEqual(helpers.get_config("12", "nested_test", "layer_one"), {"layer_two" : "default_core"})
+        self.assertEqual(helpers.get_config("12", "nested_test", "layer_one", "layer_two"), "default_core")
     
-    # def test_nested_data_guild_does_not_fallback_when_first_layer_entered(self):
-    #     #TODO: this returns an empty dict, because works with nested, not sure if this is desired..
-    #     self.assertEqual(helpers.get_config("3", "second_nest", "layer_one"), {})
+    def test_nested_data_guild_does_not_fallback_when_first_layer_entered(self):
+        #TODO: this returns an empty dict, because works with nested, not sure if this is desired..
+        self.assertEqual(helpers.get_config("3", "second_nest", "layer_one"), {})
 
     def test_report_exception_when_no_default_config(self):
         default_config = os.environ["config_default"]
