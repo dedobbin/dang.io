@@ -21,7 +21,7 @@ class Youtube_S:
             option.add_argument("--headless")
             option.add_argument('--disable-gpu')
         try:
-            self.driver = webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=option)
+            self.driver = self.create_web_driver(option)
         except Exception as e:
             logging.error("couldn't start web driver:" +  str(e))
             raise e
@@ -83,6 +83,9 @@ class Youtube_S:
 
     def sanity_check(self):
         return not not self.driver
+
+    def create_web_driver(self, options):
+        return webdriver.Chrome(executable_path=os.getenv('CHROME_EXECUTABLE_PATH'), options=options)
 
     def __scroll_to_bottom(self):
         # pretty jank, but works usually 
